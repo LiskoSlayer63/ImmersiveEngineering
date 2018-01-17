@@ -37,6 +37,8 @@ public class Config
 	public static HashMap<String, int[]> manual_intA = new HashMap<String, int[]>();
 	public static HashMap<String, Double> manual_double = new HashMap<String, Double>();
 	public static HashMap<String, double[]> manual_doubleA = new HashMap<String, double[]>();
+	public static HashMap<String, String> manual_string = new HashMap<String, String>();
+	public static HashMap<String, String[]> manual_stringA = new HashMap<String, String[]>();
 
 	public static boolean seaonal_festive = false;
 
@@ -156,9 +158,12 @@ public class Config
 			public static int pump_consumption = 250;
 			@Comment({"The Flux the Fluid Pump will consume pressurize+accellerate fluids, increasing the transferrate"})
 			public static int pump_consumption_accelerate = 5;
-			@Comment({"Set this to false to disable the fluid pump being able to draw infinite water from sources"})
+			@Comment({"Set the fluid sources that should be infinite when pumping\nIf pump_blacklistMode is true, this acts like a blacklist"})
+			@Mapped(mapClass = Config.class, mapName = "manual_stringA")
+			public static String[] pump_infiniteFluids = new String[]{ "minecraft:water" };
+			@Comment({"Setting this to true inverts the infiniteFluids list to act like a blacklist instead of whitelist"})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
-			public static boolean pump_infiniteWater = true;
+			public static boolean pump_blacklistMode = false;
 			@Comment({"If this is set to true (default) the pump will replace fluids it picks up with cobblestone in order to reduce lag caused by flowing fluids."})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			public static boolean pump_placeCobble = true;
