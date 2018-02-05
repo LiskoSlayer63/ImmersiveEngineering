@@ -191,7 +191,8 @@ public class TileEntityFluidSorter extends TileEntityIEBase implements IGuiTile
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing)
 	{
-		if(capability==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && facing!=null)
+		facing = facing != null ? facing : EnumFacing.NORTH;
+		if(capability==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
 			return (T)insertionHandlers[facing.ordinal()];
 		return super.getCapability(capability, facing);
 	}
