@@ -537,14 +537,6 @@ public class Config
 		WireType.wireColouration =
 				(IEConfig.wireColouration.length!=IEConfig.wireColourationDefault.length)?IEConfig.wireColourationDefault: IEConfig.wireColouration;
 		WireType.wireLength = IEConfig.wireLength;
-		
-		String send = "all fluids:\n";
-		for(String fluid : IEConfig.Machines.pump_infiniteFluids){
-			send += "  " + fluid + "\n";
-		}
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		if(player != null)
-			player.sendMessage(new TextComponentString(send));
 	}
 
 	public static void validateAndMapValues(Class confClass)
