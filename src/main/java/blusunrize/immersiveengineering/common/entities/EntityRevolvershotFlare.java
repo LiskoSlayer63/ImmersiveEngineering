@@ -11,8 +11,8 @@ package blusunrize.immersiveengineering.common.entities;
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.tool.BulletHandler.IBullet;
 import blusunrize.immersiveengineering.common.util.Utils;
-import elucent.albedo.lighting.ILightProvider;
-import elucent.albedo.lighting.Light;
+//import elucent.albedo.lighting.ILightProvider;
+//import elucent.albedo.lighting.Light;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -30,7 +30,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 @Optional.Interface(iface = "elucent.albedo.lighting.ILightProvider", modid = "albedo")
-public class EntityRevolvershotFlare extends EntityRevolvershot implements ILightProvider
+public class EntityRevolvershotFlare extends EntityRevolvershot // implements ILightProvider
 {
 	boolean shootUp = false;
 	public int colour = -1;
@@ -151,17 +151,17 @@ public class EntityRevolvershotFlare extends EntityRevolvershot implements ILigh
 		this.setDead();
 	}
 
-	@Nullable
-	@Optional.Method(modid = "albedo")
-	@SideOnly(Side.CLIENT)
-	@Override
-	public Light provideLight()
-	{
-		float r = (getColour() >> 16&255)/255f;
-		float g = (getColour() >> 8&255)/255f;
-		float b = (getColour()&255)/255f;
-		if(lightPos!=null)
-			return Light.builder().pos(lightPos).radius(16).color(r, g, b).build();
-		return Light.builder().pos(this).radius(1).color(r, g, b).build();
-	}
+//	@Nullable
+//	@Optional.Method(modid = "albedo")
+//	@SideOnly(Side.CLIENT)
+//	@Override
+//	public Light provideLight()
+//	{
+//		float r = (getColour() >> 16&255)/255f;
+//		float g = (getColour() >> 8&255)/255f;
+//		float b = (getColour()&255)/255f;
+//		if(lightPos!=null)
+//			return Light.builder().pos(lightPos).radius(16).color(r, g, b).build();
+//		return Light.builder().pos(this).radius(1).color(r, g, b).build();
+//	}
 }
