@@ -29,13 +29,12 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 
@@ -47,30 +46,30 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	public boolean rsDirty = false;
 
 	protected RedstoneWireNetwork wireNetwork = new RedstoneWireNetwork().add(this);
-	private boolean loaded = false;
+	private boolean refreshWireNetwork = false;
 	// ONLY EVER USE THIS ON THE CLIENT! I don't want to sync the entire network...
 	private int outputClient = -1;
 
 	@Override
 	public void update()
 	{
-		if(hasWorld() && !world.isRemote && !loaded)
+		if(hasWorld()&&!world.isRemote&&!refreshWireNetwork)
 		{
-			loaded = true;
+			refreshWireNetwork = true;
 			wireNetwork.removeFromNetwork(null);
 		}
-		if (hasWorld() && !world.isRemote && rsDirty)
+		if(hasWorld()&&!world.isRemote&&rsDirty)
 			wireNetwork.updateValues();
 	}
 
 	@Override
 	public int getStrongRSOutput(IBlockState state, EnumFacing side)
 	{
-		if(!isRSOutput() || side != this.facing.getOpposite())
+		if(!isRSOutput()||side!=this.facing.getOpposite())
 			return 0;
-		if (world.isRemote)
+		if(world.isRemote)
 			return outputClient;
-		return wireNetwork != null ? wireNetwork.getPowerOutput(redstoneChannel) : 0;
+		return wireNetwork!=null?wireNetwork.getPowerOutput(redstoneChannel): 0;
 	}
 
 	@Override
@@ -78,9 +77,9 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	{
 		if(!isRSOutput())
 			return 0;
-		if (world.isRemote)
+		if(world.isRemote)
 			return outputClient;
-		return wireNetwork != null ? wireNetwork.getPowerOutput(redstoneChannel) : 0;
+		return wireNetwork!=null?wireNetwork.getPowerOutput(redstoneChannel): 0;
 	}
 
 	@Override
@@ -104,11 +103,12 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	@Override
 	public void onChange()
 	{
-		if (!isInvalid() && isRSOutput())
+		if(!isInvalid()&&isRSOutput())
 		{
 			markDirty();
-			markContainingBlockForUpdate(null);
-			markBlockForUpdate(pos.offset(facing), null);
+			IBlockState stateHere = world.getBlockState(pos);
+			markContainingBlockForUpdate(stateHere);
+			markBlockForUpdate(pos.offset(facing), stateHere);
 		}
 	}
 
@@ -120,25 +120,26 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 
 	public boolean isRSInput()
 	{
-		return ioMode == 0;
+		return ioMode==0;
 	}
 
 	@Override
 	public void updateInput(byte[] signals)
 	{
-		if (isRSInput())
-			signals[redstoneChannel] = (byte) Math.max(getLocalRS(), signals[redstoneChannel]);
+		if(isRSInput())
+			signals[redstoneChannel] = (byte)Math.max(getLocalRS(), signals[redstoneChannel]);
 		rsDirty = false;
 	}
+
 	protected int getLocalRS()
 	{
-		int val = world.isBlockIndirectlyGettingPowered(pos);
-		if (val == 0)
+		int val = world.getRedstonePowerFromNeighbors(pos);
+		if(val==0)
 		{
-			for (EnumFacing f:EnumFacing.HORIZONTALS)
+			for(EnumFacing f : EnumFacing.HORIZONTALS)
 			{
 				IBlockState state = world.getBlockState(pos.offset(f));
-				if (state.getBlock()== Blocks.REDSTONE_WIRE&&state.getValue(BlockRedstoneWire.POWER)>val)
+				if(state.getBlock()==Blocks.REDSTONE_WIRE&&state.getValue(BlockRedstoneWire.POWER) > val)
 					val = state.getValue(BlockRedstoneWire.POWER);
 			}
 		}
@@ -147,7 +148,7 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 
 	public boolean isRSOutput()
 	{
-		return ioMode == 1;
+		return ioMode==1;
 	}
 
 	@Override
@@ -155,9 +156,9 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	{
 		//Sneaking iterates through colours, normal hammerign toggles in and out
 		if(player.isSneaking())
-			redstoneChannel = (redstoneChannel + 1) % 16;
+			redstoneChannel = (redstoneChannel+1)%16;
 		else
-			ioMode = ioMode == 0 ? 1 : 0;
+			ioMode = ioMode==0?1: 0;
 		markDirty();
 		wireNetwork.updateValues();
 		onChange();
@@ -171,20 +172,18 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	{
 		if(!REDSTONE_CATEGORY.equals(cableType.getCategory()))
 			return false;
-		return limitType == null || limitType == cableType;
+		return limitType==null||limitType==cableType;
 	}
 
 	@Override
 	public void connectCable(WireType cableType, TargetingInfo target, IImmersiveConnectable other)
 	{
 		super.connectCable(cableType, target, other);
-		if(other instanceof IRedstoneConnector)
-			if(((IRedstoneConnector) other).getNetwork() != wireNetwork)
-				wireNetwork.mergeNetwork(((IRedstoneConnector) other).getNetwork());
+		RedstoneWireNetwork.updateConnectors(pos, world, wireNetwork);
 	}
 
 	@Override
-	public void removeCable(ImmersiveNetHandler.Connection connection)
+	public void removeCable(@Nullable ImmersiveNetHandler.Connection connection)
 	{
 		super.removeCable(connection);
 		wireNetwork.removeFromNetwork(this);
@@ -219,6 +218,7 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	{
 		return false;
 	}
+
 	@Override
 	public boolean canRotate(EnumFacing axis)
 	{
@@ -233,14 +233,14 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 		nbt.setInteger("facing", facing.ordinal());
 		nbt.setInteger("ioMode", ioMode);
 		nbt.setInteger("redstoneChannel", redstoneChannel);
-		nbt.setInteger("output", wireNetwork != null ? wireNetwork.getPowerOutput(redstoneChannel) : 0);
+		nbt.setInteger("output", wireNetwork!=null?wireNetwork.getPowerOutput(redstoneChannel): 0);
 	}
 
 	@Override
 	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket)
 	{
 		super.readCustomNBT(nbt, descPacket);
-		facing = EnumFacing.getFront(nbt.getInteger("facing"));
+		facing = EnumFacing.byIndex(nbt.getInteger("facing"));
 		ioMode = nbt.getInteger("ioMode");
 		redstoneChannel = nbt.getInteger("redstoneChannel");
 		outputClient = nbt.getInteger("output");
@@ -250,8 +250,14 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	public Vec3d getConnectionOffset(Connection con)
 	{
 		EnumFacing side = facing.getOpposite();
-		double conRadius = con.cableType.getRenderDiameter() / 2;
-		return new Vec3d(.5 - conRadius * side.getFrontOffsetX(), .5 - conRadius * side.getFrontOffsetY(), .5 - conRadius * side.getFrontOffsetZ());
+		double conRadius = con.cableType.getRenderDiameter()/2;
+		return new Vec3d(.5-conRadius*side.getXOffset(), .5-conRadius*side.getYOffset(), .5-conRadius*side.getZOffset());
+	}
+
+	@Override
+	public void onConnectivityUpdate(BlockPos pos, int dimension)
+	{
+		refreshWireNetwork = false;
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -262,7 +268,7 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	public AxisAlignedBB getRenderBoundingBox()
 	{
 		int inc = getRenderRadiusIncrease();
-		return new AxisAlignedBB(this.pos.getX() - inc, this.pos.getY() - inc, this.pos.getZ() - inc, this.pos.getX() + inc + 1, this.pos.getY() + inc + 1, this.pos.getZ() + inc + 1);
+		return new AxisAlignedBB(this.pos.getX()-inc, this.pos.getY()-inc, this.pos.getZ()-inc, this.pos.getX()+inc+1, this.pos.getY()+inc+1, this.pos.getZ()+inc+1);
 	}
 
 	int getRenderRadiusIncrease()
@@ -281,15 +287,15 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 			case UP:
 				return new float[]{wMin, 0, wMin, wMax, length, wMax};
 			case DOWN:
-				return new float[]{wMin, 1 - length, wMin, wMax, 1, wMax};
+				return new float[]{wMin, 1-length, wMin, wMax, 1, wMax};
 			case SOUTH:
 				return new float[]{wMin, wMin, 0, wMax, wMax, length};
 			case NORTH:
-				return new float[]{wMin, wMin, 1 - length, wMax, wMax, 1};
+				return new float[]{wMin, wMin, 1-length, wMax, wMax, 1};
 			case EAST:
 				return new float[]{0, wMin, wMin, length, wMax, wMax};
 			case WEST:
-				return new float[]{1 - length, wMin, wMin, 1, wMax, wMax};
+				return new float[]{1-length, wMin, wMin, 1, wMax, wMax};
 		}
 		return new float[]{0, 0, 0, 1, 1, 1};
 	}
@@ -299,9 +305,9 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 	public boolean shouldRenderGroup(IBlockState object, String group)
 	{
 		if("io_out".equals(group))
-			return this.ioMode == 1;
+			return this.ioMode==1;
 		else if("io_in".equals(group))
-			return this.ioMode == 0;
+			return this.ioMode==0;
 		return true;
 	}
 
@@ -313,7 +319,7 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 			return 0xff000000|EnumDyeColor.byMetadata(this.redstoneChannel).getColorValue();
 		return 0xffffffff;
 	}
-	
+
 	@Override
 	public String getCacheKey(IBlockState object)
 	{
@@ -326,8 +332,8 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 		if(!hammer)
 			return null;
 		return new String[]{
-				I18n.format(Lib.DESC_INFO + "redstoneChannel", I18n.format("item.fireworksCharge." + EnumDyeColor.byMetadata(redstoneChannel).getUnlocalizedName())),
-				I18n.format(Lib.DESC_INFO + "blockSide.io." + this.ioMode)
+				I18n.format(Lib.DESC_INFO+"redstoneChannel", I18n.format("item.fireworksCharge."+EnumDyeColor.byMetadata(redstoneChannel).getTranslationKey())),
+				I18n.format(Lib.DESC_INFO+"blockSide.io."+this.ioMode)
 		};
 	}
 
@@ -337,4 +343,9 @@ public class TileEntityConnectorRedstone extends TileEntityImmersiveConnectable 
 		return false;
 	}
 
+	@Override
+	public boolean moveConnectionTo(Connection c, BlockPos newEnd)
+	{
+		return true;
 	}
+}

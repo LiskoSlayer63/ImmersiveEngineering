@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.FermenterRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -30,10 +29,10 @@ public class Fermenter
 	@ZenMethod
 	public static void addRecipe(IItemStack output, ILiquidStack fluid, IIngredient input, int energy)
 	{
-		if(CraftTweakerHelper.toObject(input) == null)
+		if(CraftTweakerHelper.toObject(input)==null)
 			return;
 		//Either output or fluid must not be null. 
-		if(CraftTweakerHelper.toStack(output).isEmpty() && (CraftTweakerHelper.toFluidStack(fluid) == null || CraftTweakerHelper.toFluidStack(fluid).getFluid() == null))
+		if(CraftTweakerHelper.toStack(output).isEmpty()&&(CraftTweakerHelper.toFluidStack(fluid)==null||CraftTweakerHelper.toFluidStack(fluid).getFluid()==null))
 			return;
 
 		FermenterRecipe r = new FermenterRecipe(CraftTweakerHelper.toFluidStack(fluid), CraftTweakerHelper.toStack(output), CraftTweakerHelper.toObject(input), energy);
@@ -53,22 +52,21 @@ public class Fermenter
 		public void apply()
 		{
 			FermenterRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			String fluid = recipe.fluidOutput != null ? recipe.fluidOutput.getLocalizedName() : "null";
-			String out = !recipe.itemOutput.isEmpty() ? recipe.itemOutput.getDisplayName() : "null";
-			return "Adding Fermenter Recipe for Fluid " + fluid + " and Item " + out;
+			String fluid = recipe.fluidOutput!=null?recipe.fluidOutput.getLocalizedName(): "null";
+			String out = !recipe.itemOutput.isEmpty()?recipe.itemOutput.getDisplayName(): "null";
+			return "Adding Fermenter Recipe for Fluid "+fluid+" and Item "+out;
 		}
 	}
 
 	@ZenMethod
 	public static void removeFluidRecipe(ILiquidStack fluid)
 	{
-		if(CraftTweakerHelper.toFluidStack(fluid) != null)
+		if(CraftTweakerHelper.toFluidStack(fluid)!=null)
 			CraftTweakerAPI.apply(new RemoveFluid(CraftTweakerHelper.toFluidStack(fluid)));
 	}
 
@@ -89,10 +87,9 @@ public class Fermenter
 			while(it.hasNext())
 			{
 				FermenterRecipe r = it.next();
-				if(r != null && r.fluidOutput != null && r.fluidOutput.isFluidEqual(output))
+				if(r!=null&&r.fluidOutput!=null&&r.fluidOutput.isFluidEqual(output))
 				{
 					removedRecipes.add(r);
-					IECompatModule.jeiRemoveFunc.accept(r);
 					it.remove();
 				}
 			}
@@ -101,7 +98,7 @@ public class Fermenter
 		@Override
 		public String describe()
 		{
-			return "Removing Fermenter Recipes for Fluid " + output.getLocalizedName();
+			return "Removing Fermenter Recipes for Fluid "+output.getLocalizedName();
 		}
 	}
 
@@ -129,10 +126,9 @@ public class Fermenter
 			while(it.hasNext())
 			{
 				FermenterRecipe r = it.next();
-				if(r != null && OreDictionary.itemMatches(output, r.itemOutput, false))
+				if(r!=null&&OreDictionary.itemMatches(output, r.itemOutput, false))
 				{
 					removedRecipes.add(r);
-					IECompatModule.jeiRemoveFunc.accept(r);
 					it.remove();
 				}
 			}
@@ -141,14 +137,14 @@ public class Fermenter
 		@Override
 		public String describe()
 		{
-			return "Removing Fermenter Recipes for ItemStack " + output.getDisplayName();
+			return "Removing Fermenter Recipes for ItemStack "+output.getDisplayName();
 		}
 	}
 
 	@ZenMethod
 	public static void removeByInput(IItemStack stack)
 	{
-		if(CraftTweakerHelper.toStack(stack) != null)
+		if(CraftTweakerHelper.toStack(stack)!=null)
 			CraftTweakerAPI.apply(new RemoveByInput(CraftTweakerHelper.toStack(stack)));
 	}
 
@@ -169,10 +165,9 @@ public class Fermenter
 			while(it.hasNext())
 			{
 				FermenterRecipe r = it.next();
-				if(r != null && r.input.matchesItemStack(input))
+				if(r!=null&&r.input.matchesItemStack(input))
 				{
 					removedRecipes.add(r);
-					IECompatModule.jeiRemoveFunc.accept(r);
 					it.remove();
 				}
 			}
@@ -181,7 +176,7 @@ public class Fermenter
 		@Override
 		public String describe()
 		{
-			return "Removing Fermenter Recipes for input " + input.getDisplayName();
+			return "Removing Fermenter Recipes for input "+input.getDisplayName();
 		}
 	}
 }

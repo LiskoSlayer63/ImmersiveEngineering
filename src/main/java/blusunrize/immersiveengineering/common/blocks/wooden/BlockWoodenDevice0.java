@@ -34,6 +34,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.Properties;
 
 public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDevice0>
 {
@@ -41,7 +42,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 
 	public BlockWoodenDevice0()
 	{
-		super("wooden_device0",Material.WOOD, PropertyEnum.create("type", BlockTypes_WoodenDevice0.class), ItemBlockIENoInventory.class, IEProperties.FACING_ALL, IEProperties.SIDECONFIG[0], IEProperties.SIDECONFIG[1], IEProperties.MULTIBLOCKSLAVE);
+		super("wooden_device0", Material.WOOD, PropertyEnum.create("type", BlockTypes_WoodenDevice0.class), ItemBlockIENoInventory.class, IEProperties.FACING_ALL, IEProperties.SIDECONFIG[0], IEProperties.SIDECONFIG[1], IEProperties.MULTIBLOCKSLAVE, Properties.AnimationProperty);
 		this.setHardness(2.0F);
 		this.setResistance(5.0F);
 		this.setMetaLightOpacity(BlockTypes_WoodenDevice0.WORKBENCH.getMeta(), 0);
@@ -60,12 +61,13 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	{
 		return true;
 	}
+
 	@Override
 	public String getCustomStateMapping(int meta, boolean itemBlock)
 	{
 		if(meta==BlockTypes_WoodenDevice0.WORKBENCH.getMeta())
 			return "workbench";
-		if(Config.seaonal_festive && (meta==BlockTypes_WoodenDevice0.CRATE.getMeta()||meta==BlockTypes_WoodenDevice0.REINFORCED_CRATE.getMeta()||meta==BlockTypes_WoodenDevice0.GUNPOWDER_BARREL.getMeta()))
+		if(Config.seaonal_festive&&(meta==BlockTypes_WoodenDevice0.CRATE.getMeta()||meta==BlockTypes_WoodenDevice0.REINFORCED_CRATE.getMeta()||meta==BlockTypes_WoodenDevice0.GUNPOWDER_BARREL.getMeta()))
 			return "festive";
 		return null;
 	}
@@ -78,6 +80,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 			return 0;
 		return -1;
 	}
+
 	public void doExplosion(World world, BlockPos pos, IBlockState state, EntityLivingBase igniter, int explosivesType)
 	{
 		if(!world.isRemote)
@@ -116,7 +119,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	{
 		ItemStack stack = player.getHeldItem(hand);
 		int explosivesType = this.getExplosivesType(state);
-		if(explosivesType>=0 && !stack.isEmpty())
+		if(explosivesType >= 0&&!stack.isEmpty())
 		{
 			Item item = stack.getItem();
 
@@ -125,26 +128,29 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 				this.doExplosion(world, pos, state, player, explosivesType);
 				if(item==Items.FLINT_AND_STEEL)
 					stack.damageItem(1, player);
-				else if (!player.capabilities.isCreativeMode)
+				else if(!player.capabilities.isCreativeMode)
 					stack.shrink(1);
 				return true;
 			}
 		}
 		return super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ);
 	}
+
 	@Override
 	public boolean canDropFromExplosion(Explosion explosionIn)
 	{
 		isExploding = true;
 		return super.canDropFromExplosion(explosionIn);
 	}
+
 	@Override
 	public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
 	{
-		if(!isExploding || this.getExplosivesType(state)<0)
+		if(!isExploding||this.getExplosivesType(state) < 0)
 			super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
 		isExploding = false;
 	}
+
 	@Override
 	public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion)
 	{
@@ -160,32 +166,35 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 //		super.onNeighborChange(world, pos, neighbour);
 		super.neighborChanged(state, world, pos, block, fromPos);
 		int explosivesType = this.getExplosivesType(world.getBlockState(pos));
-		if(world instanceof World && explosivesType>=0 && world.isBlockPowered(pos))
+		if(world instanceof World&&explosivesType >= 0&&world.isBlockPowered(pos))
 			this.doExplosion(world, pos, world.getBlockState(pos), null, explosivesType);
 	}
+
 	@Override
 	public void onBlockAdded(World world, BlockPos pos, IBlockState state)
 	{
 		super.onBlockAdded(world, pos, state);
 		int explosivesType = this.getExplosivesType(state);
-		if(explosivesType>=0 && world.isBlockPowered(pos))
+		if(explosivesType >= 0&&world.isBlockPowered(pos))
 			this.doExplosion(world, pos, state, null, explosivesType);
 	}
+
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosionIn)
 	{
 		int explosivesType = this.getExplosivesType(world.getBlockState(pos));
-		if(explosivesType>=0)
+		if(explosivesType >= 0)
 			this.doExplosion(world, pos, world.getBlockState(pos), null, explosivesType);
 		super.onBlockExploded(world, pos, explosionIn);
 	}
+
 	@Override
-	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity)
+	public void onEntityCollision(World world, BlockPos pos, IBlockState state, Entity entity)
 	{
-		super.onEntityCollidedWithBlock(world, pos, state, entity);
+		super.onEntityCollision(world, pos, state, entity);
 		int explosivesType = this.getExplosivesType(state);
-		if(!world.isRemote && entity instanceof EntityArrow && entity.isBurning() && explosivesType>=0)
-			this.doExplosion(world, pos, state, ((EntityArrow)entity).shootingEntity instanceof EntityLivingBase?(EntityLivingBase)((EntityArrow)entity).shootingEntity:null, explosivesType);
+		if(!world.isRemote&&entity instanceof EntityArrow&&entity.isBurning()&&explosivesType >= 0)
+			this.doExplosion(world, pos, state, ((EntityArrow)entity).shootingEntity instanceof EntityLivingBase?(EntityLivingBase)((EntityArrow)entity).shootingEntity: null, explosivesType);
 	}
 
 	//	@Override
@@ -197,7 +206,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	//			ItemStack stack = new ItemStack(this,1,world.getBlockMetadata(x, y, z));
 	//			NBTTagCompound tag = new NBTTagCompound();
 	//			((TileEntityWoodenBarrel) te).writeTank(tag, true);
-	//			if(!tag.hasNoTags())
+	//			if(!tag.isEmpty())
 	//				stack.setTagCompound(tag);
 	//			return stack;
 	//		}
@@ -215,7 +224,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	//				ItemStack stack = new ItemStack(this, 1, meta);
 	//				NBTTagCompound tag = new NBTTagCompound();
 	//				((TileEntityWoodenCrate) te).writeInv(tag, true);
-	//				if(!tag.hasNoTags())
+	//				if(!tag.isEmpty())
 	//					stack.setTagCompound(tag);
 	//				world.spawnEntity(new EntityItem(world, x+.5, y+.5, z+.5, stack));
 	//			}
@@ -225,7 +234,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	//				ItemStack stack = new ItemStack(this, 1, meta);
 	//				NBTTagCompound tag = new NBTTagCompound();
 	//				((TileEntityWoodenBarrel) te).writeTank(tag, true);
-	//				if(!tag.hasNoTags())
+	//				if(!tag.isEmpty())
 	//					stack.setTagCompound(tag);
 	//				world.spawnEntity(new EntityItem(world, x+.5, y+.5, z+.5, stack));
 	//			}
@@ -243,7 +252,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	//				ItemStack stack = new ItemStack(this, 1, world.getBlockMetadata(x, y, z));
 	//				NBTTagCompound tag = new NBTTagCompound();
 	//				((TileEntityWoodenCrate) te).writeInv(tag, true);
-	//				if(!tag.hasNoTags())
+	//				if(!tag.isEmpty())
 	//					stack.setTagCompound(tag);
 	//				world.spawnEntity(new EntityItem(world, x+.5, y+.5, z+.5, stack));
 	//			}
@@ -253,7 +262,7 @@ public class BlockWoodenDevice0 extends BlockIETileProvider<BlockTypes_WoodenDev
 	//				ItemStack stack = new ItemStack(this, 1, world.getBlockMetadata(x, y, z));
 	//				NBTTagCompound tag = new NBTTagCompound();
 	//				((TileEntityWoodenBarrel) te).writeTank(tag, true);
-	//				if(!tag.hasNoTags())
+	//				if(!tag.isEmpty())
 	//					stack.setTagCompound(tag);
 	//				world.spawnEntity(new EntityItem(world, x+.5, y+.5, z+.5, stack));
 	//			}

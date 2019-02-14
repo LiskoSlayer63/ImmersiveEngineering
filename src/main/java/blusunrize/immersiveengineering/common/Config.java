@@ -10,6 +10,7 @@ package blusunrize.immersiveengineering.common;
 
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.crafting.*;
+import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.tool.BelljarHandler;
 import blusunrize.immersiveengineering.common.Config.IEConfig.Machines;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntityConnectorLV;
@@ -17,19 +18,25 @@ import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import blusunrize.immersiveengineering.common.world.IEWorldGen;
 import com.google.common.collect.Maps;
-import net.minecraftforge.common.config.Config.Comment;
+import net.minecraftforge.common.config.Config.*;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+@Mod.EventBusSubscriber
 public class Config
 {
 	public static HashMap<String, Boolean> manual_bool = new HashMap<String, Boolean>();
@@ -42,11 +49,13 @@ public class Config
 
 	public static boolean seaonal_festive = false;
 
-	@net.minecraftforge.common.config.Config(modid=ImmersiveEngineering.MODID)
+	@net.minecraftforge.common.config.Config(modid = ImmersiveEngineering.MODID)
 	public static class IEConfig
 	{
 		//Wire Stuff
-		@Comment({"Drop connections with non-existing endpoints when loading the world. Use with care and backups and only when suspecting corrupted data.", "This option will check and load all connection endpoints and may slow down the world loading process."})
+		@Comment({"Drop connections with non-existing endpoints when loading the world. Use with care and backups and only when suspecting corrupted data.",
+				"This option will check and load all connection endpoints and may slow down the world loading process."})
+		@RequiresWorldRestart
 		public static boolean validateConnections = false;
 		@Comment({"The transfer rates in Flux/t for the wire tiers (copper, electrum, HV, Structural Rope, Cable & Redstone(no transfer) )"})
 		@Mapped(mapClass = Config.class, mapName = "manual_intA")
@@ -63,6 +72,7 @@ public class Config
 				"This shouldn't cause significant lag but possibly will. If it does, please report it at https://github.com/BluSunrize/ImmersiveEngineering/issues unless there is a report of it already."})
 		public static boolean enableWireDamage = true;
 		@Comment({"If this is enabled, placing a block in a wire will break it (drop the wire coil)"})
+		@RequiresWorldRestart
 		public static boolean blocksBreakWires = true;
 
 		@Comment({"By default all devices that accept cables have increased renderbounds to show cables even if the block itself is not in view.", "Disabling this reduces them to their minimum sizes, which might improve FPS on low-power PCs"})
@@ -87,6 +97,7 @@ public class Config
 		@Comment({"Set this to false to hide the update news in the manual"})
 		public static boolean showUpdateNews = true;
 		@Comment({"Set this to false to stop the IE villager house from spawning"})
+		@RequiresMcRestart
 		public static boolean villagerHouse = true;
 		@Comment({"Set this to false to remove IE villagers from the game"})
 		public static boolean enableVillagers = true;
@@ -94,12 +105,17 @@ public class Config
 		public static int hempSeedWeight = 5;
 		@Comment({"Allows revolvers and other IE items to look properly held in 3rd person. This uses a coremod. Can be disabled in case of conflicts with other animation mods."})
 		public static boolean fancyItemHolding = true;
-		@Comment({"Allows snazzy looking animations on drills and revolvers. May impact framerate."})
-		public static boolean fancyItemAnimations = true;
+		@Comment({"Set to false to disable the stencil buffer. This may be necessary on older GPUs."})
+		@RequiresMcRestart
+		public static boolean stencilBufferEnabled = true;
 
 
-		@Comment({"A list of all mods that IE has integrated compatability for","Setting any of these to false disables the respective compat"})
-		public static Map<String,Boolean> compat = Maps.newHashMap(Maps.toMap(IECompatModule.moduleClasses.keySet(), (s)->Boolean.TRUE));
+		@Comment({"A list of all mods that IE has integrated compatability for", "Setting any of these to false disables the respective compat"})
+		public static Map<String, Boolean> compat = Maps.newHashMap(Maps.toMap(IECompatModule.moduleClasses.keySet(), (s) -> Boolean.TRUE));
+
+		@Comment({"A config setting to enable debug features. These features may vary between releases, may cause crashes, and are unsupported. Do not enable unless asked to by a developer of IE."})
+		public static boolean enableDebug = false;
+
 		@SubConfig
 		public static Machines machines;
 		@SubConfig
@@ -116,54 +132,74 @@ public class Config
 			public static int[] wireConnectorInput = new int[]{256, 1024, 4096};
 			//Capacitors
 			@Comment({"The maximum amount of Flux that can be stored in a low-voltage capacitor"})
+			@RangeInt(min = 1)
 			public static int capacitorLV_storage = 100000;
 			@Comment({"The maximum amount of Flux that can be input into a low-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorLV_input = 256;
 			@Comment({"The maximum amount of Flux that can be output from a low-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorLV_output = 256;
 			@Comment({"The maximum amount of Flux that can be stored in a medium-voltage capacitor"})
+			@RangeInt(min = 1)
 			public static int capacitorMV_storage = 1000000;
 			@Comment({"The maximum amount of Flux that can be input into a medium-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorMV_input = 1024;
 			@Comment({"The maximum amount of Flux that can be output from a medium-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorMV_output = 1024;
 			@Comment({"The maximum amount of Flux that can be stored in a high-voltage capacitor"})
+			@RangeInt(min = 1)
 			public static int capacitorHV_storage = 4000000;
 			@Comment({"The maximum amount of Flux that can be input into a high-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorHV_input = 4096;
 			@Comment({"The maximum amount of Flux that can be output from a high-voltage capacitor (by IE net or other means)"})
+			@RangeInt(min = 1)
 			public static int capacitorHV_output = 4096;
 
 			//Generators
 			@Comment({"The base Flux that is output by the dynamo. This will be modified by the rotation modifier of the attached water- or windmill"})
+			@RangeDouble(min = 0)
 			public static double dynamo_output = 3d;
 			@Comment({"Output modifier for the energy created by the Thermoelectric Generator"})
+			@RangeDouble(min = 0)
 			public static double thermoelectric_output = 1d;
 			@Comment({"The Flux that will be output by the lightning rod when it is struck"})
-			public static int lightning_output = 4 * 4000000;
+			@RangeInt(min = 0)
+			public static int lightning_output = 4*4000000;
 			@Comment({"The Flux per tick that the Diesel Generator will output. The burn time of the fuel determines the total output"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 0)
 			public static int dieselGen_output = 4096;
 
 			//Simple Machines
 			@Comment({"The Flux per tick consumed to add one heat to a furnace. Creates up to 4 heat in the startup time and then 1 heat per tick to keep it running"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int heater_consumption = 8;
 			@Comment({"The Flux per tick consumed to double the speed of the furnace. Only happens if furnace is at maximum heat."})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int heater_speedupConsumption = 24;
 			@Comment({"The Flux per tick the Blast Furnace Preheater will consume to speed up the Blast Furnace"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int preheater_consumption = 32;
 			@Comment({"The length in ticks it takes for the Core Sample Drill to figure out which mineral is found in a chunk"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int coredrill_time = 200;
 			@Comment({"The Flux per tick consumed by the Core Sample Drill"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int coredrill_consumption = 40;
 			@Comment({"The Flux the Fluid Pump will consume to pick up a fluid block in the world"})
+			@RangeInt(min = 1)
 			public static int pump_consumption = 250;
-			@Comment({"The Flux the Fluid Pump will consume pressurize+accellerate fluids, increasing the transferrate"})
+			@Comment({"The Flux the Fluid Pump will consume pressurize+accelerate fluids, increasing the transferrate"})
+			@RangeInt(min = 1)
 			public static int pump_consumption_accelerate = 5;
 			@Comment({"Set the fluid sources that should be infinite when pumping\nIf pump_blacklistMode is true, this acts like a blacklist"})
 			@Mapped(mapClass = Config.class, mapName = "manual_stringA")
@@ -175,113 +211,157 @@ public class Config
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			public static boolean pump_placeCobble = true;
 			@Comment({"The Flux per tick the Charging Station can insert into an item"})
+			@RangeInt(min = 1)
 			public static int charger_consumption = 256;
 			@Comment({"The Flux per tick the Tesla Coil will consume, simply by being active"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int teslacoil_consumption = 256;
 			@Comment({"The amount of Flux the Tesla Coil will consume when shocking an entity"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int teslacoil_consumption_active = 512;
 			@Comment({"The amount of damage the Tesla Coil will do when shocking an entity"})
+			@RangeDouble(min = 0)
 			public static float teslacoil_damage = 6;
 			@Comment({"The Flux per tick any turret consumes to monitor the area"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int turret_consumption = 64;
 			@Comment({"The Flux per tick the chemthrower turret consumes to shoot"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int turret_chem_consumption = 32;
 			@Comment({"The Flux per tick the gun turret consumes to shoot"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int turret_gun_consumption = 32;
 			@Comment({"The Flux per tick the belljar consumes to grow plants"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int belljar_consumption = 8;
 			@Comment({"The amount of ticks one dose of fertilizer lasts in the belljar"})
+			@RangeInt(min = 1)
 			public static int belljar_fertilizer = 6000;
 			@Comment({"The amount of fluid the belljar uses per dose of fertilizer"})
+			@RangeInt(min = 1)
 			public static int belljar_fluid = 250;
 			@Comment({"A modifier to apply to the belljars total growing speed"})
+			@RangeDouble(min = 1e-3)
 			public static float belljar_growth_mod = 1;
 			@Comment({"A base-modifier for all solid fertilizers in the belljar"})
+			@RangeDouble(min = 1e-3)
 			public static float belljar_solid_fertilizer_mod = 1f;
 			@Comment({"A base-modifier for all fluid fertilizers in the belljar"})
+			@RangeDouble(min = 1e-3)
 			public static float belljar_fluid_fertilizer_mod = 1f;
 
 			//Lights
 			@Comment({"Set this to false to disable the mob-spawn prevention of the Powered Lantern"})
 			public static boolean lantern_spawnPrevent = true;
 			@Comment({"How much Flux the powered lantern draws per tick"})
+			@RangeInt(min = 1)
 			public static int lantern_energyDraw = 1;
 			@Comment({"How much Flux the powered lantern can hold (should be greater than the power draw)"})
+			@RangeInt(min = 1)
 			public static int lantern_maximumStorage = 10;
 			@Comment({"Set this to false to disable the mob-spawn prevention of the Floodlight"})
+			@RequiresWorldRestart
 			public static boolean floodlight_spawnPrevent = true;
 			@Comment({"How much Flux the floodlight draws per tick"})
+			@RangeInt(min = 1)
 			public static int floodlight_energyDraw = 5;
 			@Comment({"How much Flux the floodlight can hold (must be at least 10x the power draw)"})
+			@RangeInt(min = 1)
 			public static int floodlight_maximumStorage = 80;
 
 
 			//Multiblock Recipes
 			@Comment({"A modifier to apply to the energy costs of every MetalPress recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float metalPress_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every MetalPress recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float metalPress_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Crusher recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float crusher_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Crusher recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float crusher_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Squeezer recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float squeezer_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Squeezer recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float squeezer_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Fermenter recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float fermenter_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Fermenter recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float fermenter_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Refinery recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float refinery_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Refinery recipe. Can't be lower than 1"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float refinery_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Arc Furnace recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float arcFurnace_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Arc Furnace recipe"})
+			@RangeDouble(min = 1e-3, max = 1e3)
 			public static float arcFurnace_timeModifier = 1;
 			@Comment({"The maximum amount of damage Graphite Electrodes can take. While the furnace is working, electrodes sustain 1 damage per tick, so this is effectively the lifetime in ticks. The default value of 96000 makes them last for 8 consecutive ingame days"})
+			@RangeInt(min = 1)
 			public static int arcfurnace_electrodeDamage = 96000;
 			@Comment({"Set this to true to make the blueprint for graphite electrodes craftable in addition to villager/dungeon loot"})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
+			@RequiresMcRestart
 			public static boolean arcfurnace_electrodeCrafting = false;
 			@Comment({"Set this to false to disable the Arc Furnace's recycling of armors and tools"})
+			@RequiresMcRestart
 			public static boolean arcfurnace_recycle = true;
 			@Comment({"A modifier to apply to the energy costs of every Automatic Workbench recipe"})
+			@RangeDouble(min = 1e-3)
 			public static float autoWorkbench_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Automatic Workbench recipe"})
+			@RangeDouble(min = 1e-3)
 			public static float autoWorkbench_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Bottling Machine's process"})
+			@RangeDouble(min = 1e-3)
 			public static float bottlingMachine_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Bottling Machine's process"})
+			@RangeDouble(min = 1e-3)
 			public static float bottlingMachine_timeModifier = 1;
 			@Comment({"A modifier to apply to the energy costs of every Mixer's process"})
+			@RangeDouble(min = 1e-3)
 			public static float mixer_energyModifier = 1;
 			@Comment({"A modifier to apply to the time of every Mixer's process"})
+			@RangeDouble(min = 1e-3)
 			public static float mixer_timeModifier = 1;
 
 			//Other Multiblock machines
 			@Comment({"The Flux the Assembler will consume to craft an item from a recipe"})
+			@RangeInt(min = 1)
 			public static int assembler_consumption = 80;
 			//@Comment({"The Flux the Bottling Machine will consume per tick, when filling items"})
 			//public static int bottlingMachine_consumption = 8;
 			@Comment({"The Flux per tick the Excavator will consume to dig"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
+			@RangeInt(min = 1)
 			public static int excavator_consumption = 4096;
 			@Comment({"The speed of the Excavator. Basically translates to how many degrees per tick it will turn."})
+			@RangeDouble(min = 1e-3)
 			public static double excavator_speed = 1d;
 			@Comment({"Set this to false to disable the ridiculous amounts of particles the Excavator spawns"})
 			public static boolean excavator_particles = true;
 			@Comment({"The chance that a given chunk will contain a mineral vein."})
+			@RangeDouble(min = 1e-3)
 			public static double excavator_chance = .2d;
 			@Comment({"The chance that the Excavator will not dig up an ore with the currently downward-facing bucket."})
+			@RangeDouble(min = 0)
 			public static double excavator_fail_chance = .05d;
 			@Comment({"The maximum amount of yield one can get out of a chunk with the excavator. Set a number smaller than zero to make it infinite"})
 			public static int excavator_depletion = 38400;
@@ -342,47 +422,62 @@ public class Config
 		public static class Tools
 		{
 			@Comment({"Set this to true to completely disable the ore-crushing recipes with the Engineers Hammer"})
+			@RequiresMcRestart
 			public static boolean disableHammerCrushing = false;
 			@Comment({"The maximum durability of the Engineer's Hammer. Used up when hammering ingots into plates."})
+			@RangeInt(min = 1)
 			public static int hammerDurabiliy = 100;
 			@Comment({"The maximum durability of the Wirecutter. Used up when cutting plates into wire."})
+			@RangeInt(min = 1)
 			public static int cutterDurabiliy = 250;
 			//@Comment({"Enable this to use the old, harder bullet recipes(require one ingot per bullet)"});
 			//public static boolean hardmodeBulletRecipes = false;
 			@Comment({"The amount of base damage a Casull Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Casull = 10f;
 			@Comment({"The amount of base damage an ArmorPiercing Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_AP = 10f;
 			@Comment({"The amount of base damage a single part of Buckshot inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Buck = 2f;
 			@Comment({"The amount of base damage a DragonsBreath Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Dragon = 3f;
 			@Comment({"The amount of base damage a Homing Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Homing = 10f;
 			@Comment({"The amount of base damage a Wolfpack Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Wolfpack = 6f;
 			@Comment({"The amount of damage the sub-projectiles of the Wolfpack Cartridge inflict"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_WolfpackPart = 4f;
 			@Comment({"The amount of damage a silver bullet inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Silver = 10f;
 			@Comment({"The amount of base damage a Phial Cartridge inflicts"})
+			@RangeDouble(min = 0)
 			public static float bulletDamage_Potion = 1f;
 
 			@Comment({"A list of sounds that should not be muffled by the Ear Defenders. Adding to this list requires knowledge of the correct sound resource names."})
 			public static String[] earDefenders_SoundBlacklist = new String[]{};
 			@Comment({"The mb of fluid the Chemical Thrower will consume per tick of usage"})
+			@RangeInt(min = 1)
 			public static int chemthrower_consumption = 10;
 			@Comment({"Set this to false to disable the use of Sneak+Scroll to switch Chemthrower tanks."})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			public static boolean chemthrower_scroll = true;
 			@Comment({"The base amount of Flux consumed per shot by the Railgun"})
+			@RangeInt(min = 1)
 			public static int railgun_consumption = 800;
 			@Comment({"A modifier for the damage of all projectiles fired by the Railgun"})
+			@RangeDouble(min = 1e-3)
 			public static float railgun_damage = 1f;
 			@Comment({"A whitelist of armor pieces to allow attaching the capacitor backpack, formatting: [mod id]:[item name]"})
 			public static String[] powerpack_whitelist = new String[]{};
 			@Comment({"A blacklist of armor pieces to allow attaching the capacitor backpack, formatting: [mod id]:[item name]. Whitelist has priority over this"})
-			public static String[] powerpack_blacklist = new String[]{"embers:ashen_cloak_chest", "ic2:batpack","ic2:cf_pack","ic2:energy_pack","ic2:jetpack","ic2:jetpack_electric","ic2:lappack"};
+			public static String[] powerpack_blacklist = new String[]{"embers:ashen_cloak_chest", "ic2:batpack", "ic2:cf_pack", "ic2:energy_pack", "ic2:jetpack", "ic2:jetpack_electric", "ic2:lappack"};
 
 			@Comment({"A whitelist of tools allowed in the toolbox, formatting: [mod id]:[item name]"})
 			public static String[] toolbox_tools = new String[]{};
@@ -395,7 +490,13 @@ public class Config
 	}
 
 	static Configuration config;
+
 	public static void preInit(FMLPreInitializationEvent event)
+	{
+		onConfigUpdate();
+	}
+
+	private static void onConfigUpdate()
 	{
 		if(IEConfig.validateConnections)
 			IELogger.warn("Connection validation enabled");
@@ -426,13 +527,20 @@ public class Config
 
 		Config.manual_int.put("excavator_depletion_days", Machines.excavator_depletion*45/24000);
 		Config.manual_bool.put("literalRailGun", false);//preventive measure for Railcraft
-		checkMappedValues(IEConfig.class);
+		validateAndMapValues(IEConfig.class);
+		WireType.wireLossRatio = IEConfig.wireLossRatio;
+		WireType.wireTransferRate = IEConfig.wireTransferRate;
+		WireType.wireColouration =
+				(IEConfig.wireColouration.length!=IEConfig.wireColourationDefault.length)?IEConfig.wireColourationDefault: IEConfig.wireColouration;
+		WireType.wireLength = IEConfig.wireLength;
 	}
 
-	public static void checkMappedValues(Class confClass)
+	public static void validateAndMapValues(Class confClass)
 	{
 		for(Field f : confClass.getDeclaredFields())
 		{
+			if(!Modifier.isStatic(f.getModifiers()))
+				continue;
 			Mapped mapped = f.getAnnotation(Mapped.class);
 			if(mapped!=null)
 				try
@@ -445,14 +553,46 @@ public class Config
 						{
 							Map map = (Map)mapField.get(null);
 							if(map!=null)
-								map.put(f.getName(),f.get(null));
+								map.put(f.getName(), f.get(null));
 						}
 					}
-				}catch(Exception e){
+				} catch(Exception e)
+				{
 					e.printStackTrace();
 				}
 			else if(f.getAnnotation(SubConfig.class)!=null)
-				checkMappedValues(f.getType());
+				validateAndMapValues(f.getType());
+			else if(f.getAnnotation(RangeDouble.class)!=null)
+				try
+				{
+					RangeDouble range = f.getAnnotation(RangeDouble.class);
+					Object valObj = f.get(null);
+					double val;
+					if(valObj instanceof Double)
+						val = (double)valObj;
+					else
+						val = (float)valObj;
+					if(val < range.min())
+						f.set(null, range.min());
+					else if(val > range.max())
+						f.set(null, range.max());
+				} catch(IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			else if(f.getAnnotation(RangeInt.class)!=null)
+				try
+				{
+					RangeInt range = f.getAnnotation(RangeInt.class);
+					int val = (int)f.get(null);
+					if(val < range.min())
+						f.set(null, range.min());
+					else if(val > range.max())
+						f.set(null, range.max());
+				} catch(IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
 		}
 	}
 
@@ -461,84 +601,23 @@ public class Config
 	public @interface Mapped
 	{
 		Class mapClass();
+
 		String mapName();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface SubConfig
-	{}
+	{
+	}
 
-//	public static void setBoolean(String key, boolean b)
-//	{
-////		config_boolean.put(key, b);
-//	}
-//	public static boolean getBoolean(String key)
-//	{
-////		Boolean b = config_boolean.get(key);
-////		return b != null && b.booleanValue();
-//		return false;
-//	}
-//
-//	public static void setInt(String key, int i)
-//	{
-////		manual_int.put(key, i);
-//	}
-//	public static int getInt(String key)
-//	{
-////		Integer i = manual_int.get(key);
-////		return i!=null?i.intValue():0;
-//		return 0;
-//	}
-//
-//	public static void setDouble(String key, double d)
-//	{
-////		manual_double.put(key, d);
-//	}
-//	public static double getDouble(String key)
-//	{
-////		Double d = manual_double.get(key);
-////		return d!=null?d.floatValue():0;
-//		return 0;
-//	}
-//
-//	public static void setString(String key, String s)
-//	{
-////		config_string.put(key, s);
-//	}
-//	public static String getString(String key)
-//	{
-////		return config_string.get(key);
-//		return "";
-//	}
-//
-//	public static void setDoubleArray(String key, double[] dA)
-//	{
-////		config_doubleArray.put(key, dA);
-//	}
-//	public static double[] getDoubleArray(String key)
-//	{
-////		return config_doubleArray.get(key);
-//		return new double[6];
-//	}
-//
-//	public static void setIntArray(String key, int[] iA)
-//	{
-////		config_intArray.put(key, iA);
-//	}
-//	public static int[] getIntArray(String key)
-//	{
-////		return config_intArray.get(key);
-//		return new int[6];
-//	}
-//
-//	public static void setStringArray(String key, String[] dA)
-//	{
-////		config_stringArray.put(key, dA);
-//	}
-//	public static String[] getStringArray(String key)
-//	{
-////		return config_stringArray.get(key);
-//		return new String[6];
-//	}
+	@SubscribeEvent
+	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent ev)
+	{
+		if(ev.getModID().equals(ImmersiveEngineering.MODID))
+		{
+			ConfigManager.sync(ImmersiveEngineering.MODID, net.minecraftforge.common.config.Config.Type.INSTANCE);
+			onConfigUpdate();
+		}
+	}
 }

@@ -13,7 +13,6 @@ import blusunrize.immersiveengineering.api.IEApi;
 import blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe;
 import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.Utils;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import net.minecraft.item.*;
@@ -24,17 +23,17 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 public class ArcRecyclingThreadHandler extends Thread
 {
 	static boolean hasProfiled = false;
-	public static List<ArcFurnaceRecipe> recipesToAdd = null;
-	private List<IRecipe> recipeList = null;
-	private ArcRecyclingThreadHandler(List<IRecipe> r)
-	{
-		recipeList = r;
-	}
-	public static void doRecipeProfiling()
+	private ArrayList<RecyclingCalculation> validated;
+	private ArrayListMultimap<ItemStack, RecyclingCalculation> nonValidated;
+	private List<IRecipe> recipeList = new ArrayList<>(ForgeRegistries.RECIPES.getValuesCollection());
+
+	@Override
+	public void run()
 	{
 		Iterator<ArcFurnaceRecipe> prevRecipeIt = ArcFurnaceRecipe.recipeList.iterator();
 		int r = 0;
@@ -45,98 +44,98 @@ public class ArcRecyclingThreadHandler extends Thread
 				if("Recycling".equals(recipe.specialRecipeType))
 				{
 					prevRecipeIt.remove();
-					IECompatModule.jeiRemoveFunc.accept(recipe);
 					r++;
 				}
 			}
 		IELogger.info("Arc Recycling: Removed "+r+" old recipes");
-		recipesToAdd = null;
-		new ArcRecyclingThreadHandler(ForgeRegistries.RECIPES.getValues()).start();
-	}
-	@Override
-	public void run() {
-		int threadAmount = Runtime.getRuntime().availableProcessors();
-		IELogger.info("Starting recipe profiler for Arc Recycling, using "+threadAmount+" Threads");
-		long timestamp = System.currentTimeMillis();
+
+		//Keep one core free for normal Forge lifecycle events
+		int threadAmount = Math.max(Runtime.getRuntime().availableProcessors()-1, 1);
 		RegistryIterationThread[] threads = new RegistryIterationThread[threadAmount];
+
+		long timestamp = System.currentTimeMillis();
+
 		boolean divisable = recipeList.size()%threadAmount==0;
-		int limit = divisable?(recipeList.size()/threadAmount) : (recipeList.size()/(threadAmount-1));
-		int leftOver = divisable?limit:(recipeList.size()-(threadAmount-1)*limit);
+		int limit = divisable?(recipeList.size()/threadAmount): (recipeList.size()/(threadAmount-1));
+		int leftOver = divisable?limit: (recipeList.size()-(threadAmount-1)*limit);
 		for(int i = 0; i < threadAmount; i++)
-			threads[i] = new RegistryIterationThread(recipeList, limit*i, i==(threadAmount-1)?leftOver:limit);
+			threads[i] = new RegistryIterationThread(recipeList, limit*i, i==(threadAmount-1)?leftOver: limit);
 
 		//iterate over each thread individually
-		ArrayList<RecyclingCalculation> validated = new ArrayList<RecyclingCalculation>();
-		ArrayListMultimap<ItemStack, RecyclingCalculation> nonValidated = ArrayListMultimap.create();
+		validated = new ArrayList<>();
+		nonValidated = ArrayListMultimap.create();
 		int invalidCount = 0;
 
-		for(int i=0; i<threads.length; i++)
+		for(int i = 0; i < threads.length; i++)
 		{
 			RegistryIterationThread thread = threads[i];
-			try {
+			try
+			{
 				thread.join();
 				for(RecyclingCalculation calc : thread.calculatedOutputs)
 					if(calc.isValid())
 						validated.add(calc);
 					else
 					{
-						for(ItemStack s : calc.queriedSubcomponents)
+						for(ItemStack s : calc.queriedSubcomponents.keySet())
 							nonValidated.put(s, calc);
 						invalidCount++;
 					}
-			}
-			catch (InterruptedException e)
+			} catch(InterruptedException e)
 			{
 				e.printStackTrace();
 			}
 		}
 		int timeout = 0;
-		while(!nonValidated.isEmpty() && timeout++<(invalidCount*10))
+		while(!nonValidated.isEmpty()&&timeout++ < (invalidCount*10))
 		{
-			ArrayList<RecyclingCalculation> newlyValid = new ArrayList<RecyclingCalculation>();
-			for(RecyclingCalculation valid :  validated)
+			ArrayList<RecyclingCalculation> newlyValid = new ArrayList<>();
+			for(RecyclingCalculation valid : validated)
 			{
-				Iterator<Map.Entry<ItemStack,RecyclingCalculation>> itNonValid = nonValidated.entries().iterator(); 
-				while(itNonValid.hasNext())
+				for(ItemStack key : nonValidated.keySet())
 				{
-					Map.Entry<ItemStack,RecyclingCalculation> e = itNonValid.next();
-					if(OreDictionary.itemMatches(e.getKey(), valid.stack, false))
-					{
-						RecyclingCalculation nonValid = e.getValue();
-						if(nonValid.validateSubcomponent(valid))
-							newlyValid.add(nonValid);
-					}
+					if(OreDictionary.itemMatches(key, valid.stack, false))
+						for(RecyclingCalculation nonValid : nonValidated.get(key))
+							if(nonValid.validateSubcomponent(valid))
+								newlyValid.add(nonValid);
 				}
 			}
+			// No new ingredients, so further iterations are useless
+			if(newlyValid.isEmpty())
+				break;
 			nonValidated.values().removeAll(newlyValid);
 			validated.addAll(newlyValid);
 		}
+		IELogger.info("Finished recipe profiler for Arc Recycling, took "
+				+(System.currentTimeMillis()-timestamp)+" milliseconds");
+	}
+
+	public void finishUp()
+	{
 		//HashSet to avoid duplicates
-		HashSet<String> finishedRecycles = new HashSet<String>();
-		List<ArcFurnaceRecipe> ret = new ArrayList<>();
-		for(RecyclingCalculation valid :  validated)
-			if(finishedRecycles.add(valid.stack.toString()) && !valid.outputs.isEmpty())
-				ret.add(new ArcRecyclingRecipe(valid.outputs, valid.stack, 100, 512));
-		for(RecyclingCalculation invalid :  Sets.newHashSet(nonValidated.values()))
-			if(finishedRecycles.add(invalid.stack.toString()) && !invalid.outputs.isEmpty())
+		HashSet<String> finishedRecycles = new HashSet<>();
+		for(RecyclingCalculation valid : validated)
+			if(finishedRecycles.add(valid.stack.toString())&&!valid.outputs.isEmpty())
+				ArcFurnaceRecipe.recipeList.add(new ArcRecyclingRecipe(valid.outputs, valid.stack, 100, 512));
+		for(RecyclingCalculation invalid : Sets.newHashSet(nonValidated.values()))
+			if(finishedRecycles.add(invalid.stack.toString())&&!invalid.outputs.isEmpty())
 			{
-//				IELogger.info("Couldn't fully analyze "+invalid.stack+", missing knowledge for "+invalid.queriedSubcomponents);
-				ret.add(new ArcRecyclingRecipe(invalid.outputs, invalid.stack, 100, 512));
+				IELogger.info("Couldn't fully analyze "+invalid.stack+", missing knowledge for "+invalid.queriedSubcomponents);
+				ArcFurnaceRecipe.recipeList.add(new ArcRecyclingRecipe(invalid.outputs, invalid.stack, 100, 512));
 			}
-		IELogger.info("Finished recipe profiler for Arc Recycling, took "+(System.currentTimeMillis()-timestamp)+" milliseconds");
-		recipesToAdd = ret;
 		hasProfiled = true;
 	}
+
 	public static class RegistryIterationThread extends Thread
 	{
 		final List<IRecipe> recipeList;
 		final int baseOffset;
 		final int passes;
-		ArrayList<RecyclingCalculation> calculatedOutputs = new ArrayList<RecyclingCalculation>();
+		ArrayList<RecyclingCalculation> calculatedOutputs = new ArrayList<>();
 
 		public RegistryIterationThread(List<IRecipe> recipeList, int baseOffset, int passes)
 		{
-			setName("Immersive Engineering Registry Iteratoration Thread");
+			setName("Immersive Engineering Registry Iteration Thread");
 			setDaemon(true);
 			start();
 			this.recipeList = recipeList;
@@ -147,10 +146,10 @@ public class ArcRecyclingThreadHandler extends Thread
 		@Override
 		public void run()
 		{
-			for(int pass=0; pass<passes; pass++)
+			for(int pass = 0; pass < passes; pass++)
 			{
 				IRecipe recipe = recipeList.get(baseOffset+pass);
-				if(!recipe.getRecipeOutput().isEmpty() && isValidForRecycling(recipe.getRecipeOutput()))
+				if(!recipe.getRecipeOutput().isEmpty()&&isValidForRecycling(recipe.getRecipeOutput()))
 				{
 					RecyclingCalculation calc = getRecycleCalculation(recipe.getRecipeOutput(), recipe);
 					if(calc!=null)
@@ -165,10 +164,10 @@ public class ArcRecyclingThreadHandler extends Thread
 		if(stack.isEmpty())
 			return false;
 		Item item = stack.getItem();
-		if(item instanceof ItemTool || item instanceof ItemSword || item instanceof ItemHoe || item instanceof ItemArmor)
+		if(item instanceof ItemTool||item instanceof ItemSword||item instanceof ItemHoe||item instanceof ItemArmor)
 			return true;
 		for(Object recycle : ArcFurnaceRecipe.recyclingAllowed)
-			if(Utils.stackMatchesObject(stack, recycle))
+			if(ApiUtils.stackMatchesObject(stack, recycle))
 				return true;
 		return false;
 	}
@@ -176,71 +175,86 @@ public class ArcRecyclingThreadHandler extends Thread
 	public static RecyclingCalculation getRecycleCalculation(ItemStack stack, IRecipe recipe)
 	{
 		NonNullList<Ingredient> inputs = recipe.getIngredients();
-
-		if(inputs!=null)
+		if(!inputs.isEmpty())
 		{
 			int inputSize = stack.getCount();
-			List<ItemStack> missingSub = new ArrayList<ItemStack>();
-			HashMap<ItemStack,Double> outputs = new HashMap<ItemStack,Double>();
-			for(Object in : inputs)
-				if(in!=null)
+			Map<ItemStack, Integer> missingSub = new HashMap<>();
+			Map<ItemStack, Double> outputs = new IdentityHashMap<>();
+			for(Ingredient in : inputs)
+				if(in!=null&&in!=Ingredient.EMPTY)
 				{
-					ItemStack inputStack = ItemStack.EMPTY;
-					if(in instanceof ItemStack)
-						inputStack = (ItemStack)in;
-					else if(in instanceof List)
-					{
-						final List<ItemStack> list = (List<ItemStack>) in;
-						inputStack = list.size() > 0 ? list.get(0) : ItemStack.EMPTY;
-					}
-					else if(in instanceof String)
-						inputStack = IEApi.getPreferredOreStack((String)in);
+					ItemStack inputStack = IEApi.getPreferredStackbyMod(in.getMatchingStacks());
 					if(inputStack.isEmpty())
-						continue;
+					{
+						IELogger.warn("Recipe has invalid inputs and will be ignored: "+recipe+" ("+recipe.getRegistryName()+")");
+						return null;
+					}
 
 					Object[] brokenDown = ApiUtils.breakStackIntoPreciseIngots(inputStack);
 					if(brokenDown==null)
 					{
 						if(isValidForRecycling(inputStack))
-							missingSub.add(inputStack);
+						{
+							boolean b = false;
+							for(ItemStack storedMiss : missingSub.keySet())
+								if(OreDictionary.itemMatches(inputStack, storedMiss, false))
+								{
+									missingSub.put(storedMiss, missingSub.get(storedMiss)+inputStack.getCount());
+									b = true;
+								}
+							if(!b)
+								missingSub.put(Utils.copyStackWithAmount(inputStack, 1), inputStack.getCount());
+						}
 						continue;
 					}
-					if(brokenDown[0]!=null && brokenDown[0] instanceof ItemStack && brokenDown[1]!=null && (Double)brokenDown[1] > 0)
+					if(brokenDown[0] instanceof ItemStack&&!((ItemStack)brokenDown[0]).isEmpty()
+							&&brokenDown[1]!=null&&(Double)brokenDown[1] > 0)
 					{
 						boolean invalidOutput = false;
 						for(Object invalid : ArcFurnaceRecipe.invalidRecyclingOutput)
-							if(Utils.stackMatchesObject((ItemStack)brokenDown[0], invalid))
-								invalidOutput=true;
+							if(ApiUtils.stackMatchesObject((ItemStack)brokenDown[0], invalid))
+								invalidOutput = true;
 						if(!invalidOutput)
 						{
 							boolean b = false;
 							for(ItemStack storedOut : outputs.keySet())
 								if(OreDictionary.itemMatches((ItemStack)brokenDown[0], storedOut, false))
 								{
-									outputs.put(storedOut, outputs.get(storedOut)+(Double)brokenDown[1]/inputSize);
-									b=true;
+									outputs.put(storedOut, outputs.get(storedOut)+(Double)brokenDown[1]);
+									b = true;
 								}
 							if(!b)
-								outputs.put(Utils.copyStackWithAmount((ItemStack)brokenDown[0],1), (Double)brokenDown[1]/inputSize);
+								outputs.put(Utils.copyStackWithAmount((ItemStack)brokenDown[0], 1), (Double)brokenDown[1]);
 						}
 					}
 				}
-			if(!outputs.isEmpty() || !missingSub.isEmpty())
+			Map<ItemStack, Double> outputScaled = new IdentityHashMap<>(outputs.size());
+			for(Entry<ItemStack, Double> e : outputs.entrySet())
+				outputScaled.put(e.getKey(), e.getValue()/inputSize);
+			if(!outputs.isEmpty()||!missingSub.isEmpty())
 			{
-				RecyclingCalculation calc = new RecyclingCalculation(recipe, Utils.copyStackWithAmount(stack,1), outputs);
-				calc.queriedSubcomponents.addAll(missingSub);
+				ItemStack in = Utils.copyStackWithAmount(stack, 1);
+				if(in.getItem().isDamageable())
+					in.setItemDamage(OreDictionary.WILDCARD_VALUE);
+				RecyclingCalculation calc = new RecyclingCalculation(recipe, in
+						, outputScaled);
+				if(!missingSub.isEmpty())
+					for(ItemStack s : missingSub.keySet())
+						calc.queriedSubcomponents.put(s, (double)missingSub.get(s)/inputSize);
 				return calc;
 			}
 		}
 		return null;
 	}
+
 	public static class RecyclingCalculation
 	{
 		IRecipe recipe;
 		ItemStack stack;
-		HashMap<ItemStack, Double> outputs;
-		ArrayList<ItemStack> queriedSubcomponents = new ArrayList<ItemStack>();
-		public RecyclingCalculation(IRecipe recipe, ItemStack stack, HashMap<ItemStack, Double> outputs)
+		Map<ItemStack, Double> outputs;
+		Map<ItemStack, Double> queriedSubcomponents = new HashMap<>();
+
+		public RecyclingCalculation(IRecipe recipe, ItemStack stack, Map<ItemStack, Double> outputs)
 		{
 			this.recipe = recipe;
 			this.stack = stack;
@@ -249,32 +263,35 @@ public class ArcRecyclingThreadHandler extends Thread
 
 		public boolean isValid()
 		{
-			return !outputs.isEmpty() && queriedSubcomponents.isEmpty();
+			return !outputs.isEmpty()&&queriedSubcomponents.isEmpty();
 		}
+
 		public boolean validateSubcomponent(RecyclingCalculation calc)
 		{
 			if(isValid())
 				return true;
 			if(!calc.isValid())
 				return false;
-			Iterator<ItemStack> it = queriedSubcomponents.iterator();
+			Iterator<ItemStack> it = queriedSubcomponents.keySet().iterator();
 			while(it.hasNext())
 			{
 				ItemStack next = it.next();
 				if(OreDictionary.itemMatches(next, calc.stack, false))
 				{
-					for(Map.Entry<ItemStack,Double> e : calc.outputs.entrySet())
+					double queriedAmount = queriedSubcomponents.get(next);
+					for(Map.Entry<ItemStack, Double> e : calc.outputs.entrySet())
 					{
+						double scaledVal = e.getValue()*queriedAmount;
 						boolean b = true;
 						for(ItemStack key : outputs.keySet())
 							if(OreDictionary.itemMatches(key, e.getKey(), false))
 							{
-								outputs.put(key, outputs.get(key)+e.getValue());
+								outputs.put(key, outputs.get(key)+scaledVal);
 								b = false;
 								break;
 							}
 						if(b)
-							outputs.put(e.getKey(), e.getValue());
+							outputs.put(e.getKey(), scaledVal);
 					}
 					it.remove();
 				}

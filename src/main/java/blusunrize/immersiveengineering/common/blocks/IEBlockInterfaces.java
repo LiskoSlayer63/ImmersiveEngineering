@@ -23,10 +23,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.obj.OBJModel.OBJState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -42,11 +44,17 @@ public class IEBlockInterfaces
 	public interface IIEMetaBlock
 	{
 		String getIEBlockName();
+
 		IProperty getMetaProperty();
+
 		Enum[] getMetaEnums();
+
 		IBlockState getInventoryState(int meta);
+
 		boolean useCustomStateMapper();
+
 		String getCustomStateMapping(int meta, boolean itemBlock);
+
 		@SideOnly(Side.CLIENT)
 		StateMapperBase getCustomMapper();
 
@@ -56,9 +64,14 @@ public class IEBlockInterfaces
 	public interface IAttachedIntegerProperies
 	{
 		String[] getIntPropertyNames();
+
 		PropertyInteger getIntProperty(String name);
+
 		int getIntPropertyValue(String name);
-		default void setValue(String name, int value) {}
+
+		default void setValue(String name, int value)
+		{
+		}
 	}
 
 	public interface IUsesBooleanProperty
@@ -69,6 +82,7 @@ public class IEBlockInterfaces
 	public interface IBlockOverlayText
 	{
 		String[] getOverlayText(EntityPlayer player, RayTraceResult mop, boolean hammer);
+
 		boolean useNixieFont(EntityPlayer player, RayTraceResult mop);
 	}
 
@@ -107,8 +121,10 @@ public class IEBlockInterfaces
 	public interface IColouredBlock
 	{
 		boolean hasCustomBlockColours();
+
 		int getRenderColour(IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex);
 	}
+
 	public interface IColouredTile
 	{
 		int getRenderColour(int tintIndex);
@@ -117,11 +133,14 @@ public class IEBlockInterfaces
 	public interface IDirectionalTile
 	{
 		EnumFacing getFacing();
+
 		void setFacing(EnumFacing facing);
+
 		/**
 		 * @return 0 = side clicked, 1=piston behaviour,  2 = horizontal, 3 = vertical, 4 = x/z axis, 5 = horizontal based on quadrant, 6 = horizontal preferring clicked side
 		 */
 		int getFacingLimitation();
+
 		default EnumFacing getFacingForPlacement(EntityLivingBase placer, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
 		{
 			EnumFacing f = EnumFacing.DOWN;
@@ -133,37 +152,45 @@ public class IEBlockInterfaces
 			else if(limit==2)
 				f = EnumFacing.fromAngle(placer.rotationYaw);
 			else if(limit==3)
-				f = (side!=EnumFacing.DOWN&&(side==EnumFacing.UP||hitY<=.5))?EnumFacing.UP : EnumFacing.DOWN;
+				f = (side!=EnumFacing.DOWN&&(side==EnumFacing.UP||hitY <= .5))?EnumFacing.UP: EnumFacing.DOWN;
 			else if(limit==4)
 			{
 				f = EnumFacing.fromAngle(placer.rotationYaw);
-				if(f==EnumFacing.SOUTH || f==EnumFacing.WEST)
+				if(f==EnumFacing.SOUTH||f==EnumFacing.WEST)
 					f = f.getOpposite();
-			} else if(limit == 5)
+			}
+			else if(limit==5)
 			{
-				if(side.getAxis() != Axis.Y)
+				if(side.getAxis()!=Axis.Y)
 					f = side.getOpposite();
 				else
 				{
-					float xFromMid = hitX - .5f;
-					float zFromMid = hitZ - .5f;
+					float xFromMid = hitX-.5f;
+					float zFromMid = hitZ-.5f;
 					float max = Math.max(Math.abs(xFromMid), Math.abs(zFromMid));
-					if(max == Math.abs(xFromMid))
-						f = xFromMid < 0 ? EnumFacing.WEST : EnumFacing.EAST;
+					if(max==Math.abs(xFromMid))
+						f = xFromMid < 0?EnumFacing.WEST: EnumFacing.EAST;
 					else
-						f = zFromMid < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+						f = zFromMid < 0?EnumFacing.NORTH: EnumFacing.SOUTH;
 				}
 			}
-			else if(limit == 6)
-				f = side.getAxis()!=Axis.Y? side.getOpposite(): EnumFacing.getDirectionFromEntityLiving(pos, placer).getOpposite();
+			else if(limit==6)
+				f = side.getAxis()!=Axis.Y?side.getOpposite(): placer.getHorizontalFacing();
 
-			return mirrorFacingOnPlacement(placer)?f.getOpposite():f;
+			return mirrorFacingOnPlacement(placer)?f.getOpposite(): f;
 		}
+
 		boolean mirrorFacingOnPlacement(EntityLivingBase placer);
+
 		boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity);
+
 		boolean canRotate(EnumFacing axis);
-		default void afterRotation(EnumFacing oldDir, EnumFacing newDir){}
+
+		default void afterRotation(EnumFacing oldDir, EnumFacing newDir)
+		{
+		}
 	}
+
 	public interface IAdvancedDirectionalTile extends IDirectionalTile
 	{
 		void onDirectionalPlacement(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase placer);
@@ -172,17 +199,39 @@ public class IEBlockInterfaces
 	public interface IConfigurableSides
 	{
 		IEEnums.SideConfig getSideConfig(int side);
+
 		boolean toggleSide(int side, EntityPlayer p);
 	}
 
 	public interface ITileDrop
 	{
-		ItemStack getTileDrop(@Nullable EntityPlayer player, IBlockState state);
+		/**
+		 * Don't call this on generic TE'S, use getTileDrops or getPickBlock
+		 */
+		default ItemStack getTileDrop(@Nullable EntityPlayer player, IBlockState state)
+		{
+			NonNullList<ItemStack> drops = getTileDrops(player, state);
+			return drops.size() > 0?drops.get(0): ItemStack.EMPTY;
+		}
+
+		default NonNullList<ItemStack> getTileDrops(@Nullable EntityPlayer player, IBlockState state)
+		{
+			return NonNullList.from(ItemStack.EMPTY, getTileDrop(player, state));
+		}
+
+		default ItemStack getPickBlock(@Nullable EntityPlayer player, IBlockState state, RayTraceResult rayRes)
+		{
+			return getTileDrop(player, state);
+		}
 
 		void readOnPlacement(@Nullable EntityLivingBase placer, ItemStack stack);
 
-		default boolean preventInventoryDrop() { return false; }
+		default boolean preventInventoryDrop()
+		{
+			return false;
+		}
 	}
+
 	public interface IAdditionalDrops
 	{
 		Collection<ItemStack> getExtraDrops(EntityPlayer player, IBlockState state);
@@ -201,6 +250,11 @@ public class IEBlockInterfaces
 	public interface IHammerInteraction
 	{
 		boolean hammerUseSide(EnumFacing side, EntityPlayer player, float hitX, float hitY, float hitZ);
+	}
+
+	public interface IPlacementInteraction
+	{
+		void onTilePlaced(World world, BlockPos pos, IBlockState state, EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase placer, ItemStack stack);
 	}
 
 	public interface IActiveState extends IUsesBooleanProperty
@@ -227,11 +281,14 @@ public class IEBlockInterfaces
 	{
 		BlockFaceShape getFaceShape(EnumFacing side);
 	}
+
 	public interface IAdvancedSelectionBounds extends IBlockBounds
 	{
 		List<AxisAlignedBB> getAdvancedSelectionBounds();
+
 		boolean isOverrideBox(AxisAlignedBB box, EntityPlayer player, RayTraceResult mop, ArrayList<AxisAlignedBB> list);
 	}
+
 	public interface IAdvancedCollisionBounds extends IBlockBounds
 	{
 		List<AxisAlignedBB> getAdvancedColisionBounds();
@@ -240,14 +297,18 @@ public class IEBlockInterfaces
 	public interface IHasDummyBlocks extends IGeneralMultiblock
 	{
 		void placeDummies(BlockPos pos, IBlockState state, EnumFacing side, float hitX, float hitY, float hitZ);
+
 		void breakDummies(BlockPos pos, IBlockState state);
+
 		boolean isDummy();
+
 		@Override
 		default boolean isLogicDummy()
 		{
 			return isDummy();
 		}
 	}
+
 	/**
 	 * super-interface for {@link TileEntityMultiblockPart} and {@link IHasDummyBlocks}
 	 */
@@ -260,14 +321,16 @@ public class IEBlockInterfaces
 	{
 		ArrayList<String> compileDisplayList();
 	}
+
 	public interface IAdvancedHasObjProperty
 	{
 		OBJState getOBJState();
 	}
+
 	public interface IDynamicTexture
 	{
 		@SideOnly(Side.CLIENT)
-		HashMap<String,String> getTextureReplacements();
+		HashMap<String, String> getTextureReplacements();
 	}
 
 	public interface IGuiTile
@@ -276,8 +339,11 @@ public class IEBlockInterfaces
 		{
 			return canOpenGui();
 		}
+
 		boolean canOpenGui();
+
 		int getGuiID();
+
 		@Nullable
 		TileEntity getGuiMaster();
 
@@ -289,12 +355,13 @@ public class IEBlockInterfaces
 	public interface IProcessTile
 	{
 		int[] getCurrentProcessesStep();
+
 		int[] getCurrentProcessesMax();
 	}
 
 	public interface INeighbourChangeTile
 	{
-		void onNeighborBlockChange(BlockPos pos);
+		void onNeighborBlockChange(BlockPos otherPos);
 	}
 
 	public interface IPropertyPassthrough

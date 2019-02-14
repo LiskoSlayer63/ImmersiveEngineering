@@ -16,6 +16,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.oredict.OreDictionary;
@@ -27,7 +28,7 @@ public abstract class ItemUpgradeableTool extends ItemInternalStorage implements
 	public ItemUpgradeableTool(String name, int stackSize, String upgradeType, String... subNames)
 	{
 		super(name, stackSize, subNames);
-		this.upgradeType=upgradeType;
+		this.upgradeType = upgradeType;
 	}
 
 	@Override
@@ -41,11 +42,13 @@ public abstract class ItemUpgradeableTool extends ItemInternalStorage implements
 	{
 		return ItemNBTHelper.getTagCompound(stack, "upgrades");
 	}
+
 	@Override
 	public void clearUpgrades(ItemStack stack)
 	{
 		ItemNBTHelper.remove(stack, "upgrades");
 	}
+
 	@Override
 	public void finishUpgradeRecalculation(ItemStack stack)
 	{
@@ -54,18 +57,20 @@ public abstract class ItemUpgradeableTool extends ItemInternalStorage implements
 	@Override
 	public void recalculateUpgrades(ItemStack stack)
 	{
+		if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+			return;
 		clearUpgrades(stack);
 		IItemHandler inv = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		NBTTagCompound upgradeTag = getUpgradeBase(stack).copy();
-		if (inv!=null)
+		if(inv!=null)
 		{
-			for (int i = 0; i < inv.getSlots(); i++)
+			for(int i = 0; i < inv.getSlots(); i++)
 			{
 				ItemStack u = inv.getStackInSlot(i);
-				if (!u.isEmpty() && u.getItem() instanceof IUpgrade)
+				if(!u.isEmpty()&&u.getItem() instanceof IUpgrade)
 				{
-					IUpgrade upg = (IUpgrade) u.getItem();
-					if (upg.getUpgradeTypes(u).contains(upgradeType) && upg.canApplyUpgrades(stack, u))
+					IUpgrade upg = (IUpgrade)u.getItem();
+					if(upg.getUpgradeTypes(u).contains(upgradeType)&&upg.canApplyUpgrades(stack, u))
 						upg.applyUpgrades(stack, u, upgradeTag);
 				}
 			}
@@ -73,15 +78,18 @@ public abstract class ItemUpgradeableTool extends ItemInternalStorage implements
 			finishUpgradeRecalculation(stack);
 		}
 	}
+
 	public NBTTagCompound getUpgradeBase(ItemStack stack)
 	{
 		return new NBTTagCompound();
 	}
+
 	@Override
 	public boolean canTakeFromWorkbench(ItemStack stack)
 	{
 		return true;
 	}
+
 	@Override
 	public void removeFromWorkbench(EntityPlayer player, ItemStack stack)
 	{
@@ -89,6 +97,7 @@ public abstract class ItemUpgradeableTool extends ItemInternalStorage implements
 
 	@Override
 	public abstract boolean canModify(ItemStack stack);
+
 	@Override
 	public abstract Slot[] getWorkbenchSlots(Container container, ItemStack stack);
 }

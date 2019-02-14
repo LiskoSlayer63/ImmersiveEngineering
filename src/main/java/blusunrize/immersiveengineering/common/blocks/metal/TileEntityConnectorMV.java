@@ -20,6 +20,7 @@ public class TileEntityConnectorMV extends TileEntityConnectorLV
 	{
 		return true;
 	}
+
 	@Override
 	protected boolean canTakeLV()
 	{
@@ -31,7 +32,7 @@ public class TileEntityConnectorMV extends TileEntityConnectorLV
 	{
 		EnumFacing side = facing.getOpposite();
 		double conRadius = con.cableType.getRenderDiameter()/2;
-		return new Vec3d(.5+side.getFrontOffsetX()*(.0625-conRadius), .5+side.getFrontOffsetY()*(.0625-conRadius), .5+side.getFrontOffsetZ()*(.0625-conRadius));
+		return new Vec3d(.5+side.getXOffset()*(.0625-conRadius), .5+side.getYOffset()*(.0625-conRadius), .5+side.getZOffset()*(.0625-conRadius));
 	}
 
 	@Override
@@ -39,12 +40,13 @@ public class TileEntityConnectorMV extends TileEntityConnectorLV
 	{
 		return WireType.ELECTRUM.getMaxLength();
 	}
-	
+
 	@Override
 	public int getMaxInput()
 	{
 		return connectorInputValues[1];
 	}
+
 	@Override
 	public int getMaxOutput()
 	{

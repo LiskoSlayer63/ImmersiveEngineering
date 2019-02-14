@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+//TODO the bug this worked around has been fixed in Forge, remove this in 1.13
 public class IngredientFactoryStackableNBT implements IIngredientFactory
 {
 	@Nonnull
@@ -33,6 +34,7 @@ public class IngredientFactoryStackableNBT implements IIngredientFactory
 	{
 		@Nonnull
 		private final ItemStack stack;
+
 		public IngredientStackableNBT(@Nonnull ItemStack match)
 		{
 			super(match);
@@ -42,11 +44,17 @@ public class IngredientFactoryStackableNBT implements IIngredientFactory
 		@Override
 		public boolean apply(@Nullable ItemStack input)
 		{
-			if (input==null||!super.apply(input))
+			if(input==null||!super.apply(input))
 				return false;
 			Optional<NBTTagCompound> tag1 = Optional.ofNullable(stack.getTagCompound());
 			Optional<NBTTagCompound> tag2 = Optional.ofNullable(input.getTagCompound());
 			return tag1.equals(tag2);
+		}
+
+		@Override
+		public boolean isSimple()
+		{
+			return false;
 		}
 	}
 }

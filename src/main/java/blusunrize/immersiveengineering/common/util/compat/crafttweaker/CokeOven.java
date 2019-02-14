@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.CokeOvenRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -27,7 +26,7 @@ public class CokeOven
 	public static void addRecipe(IItemStack output, int fuelOutput, IIngredient input, int time)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 			return;
 
 		CokeOvenRecipe r = new CokeOvenRecipe(CraftTweakerHelper.toStack(output), oInput, time, fuelOutput);
@@ -47,13 +46,12 @@ public class CokeOven
 		public void apply()
 		{
 			CokeOvenRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Coke Oven Recipe for " + recipe.output.getDisplayName();
+			return "Adding Coke Oven Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -77,14 +75,12 @@ public class CokeOven
 		public void apply()
 		{
 			removedRecipes = CokeOvenRecipe.removeRecipes(output);
-			for(CokeOvenRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Coke Oven Recipe for " + output.getDisplayName();
+			return "Removing Coke Oven Recipe for "+output.getDisplayName();
 		}
 	}
 }

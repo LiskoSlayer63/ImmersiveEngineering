@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -28,17 +27,17 @@ public class ArcFurnace
 	public static void addRecipe(IItemStack output, IIngredient input, IItemStack slag, int time, int energyPerTick, @Optional IIngredient[] additives, @Optional String specialRecipeType)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 			return;
 		Object[] adds = null;
-		if(additives != null)
+		if(additives!=null)
 		{
 			adds = new Object[additives.length];
 			for(int i = 0; i < additives.length; i++)
 				adds[i] = CraftTweakerHelper.toObject(additives[i]);
 		}
 		ArcFurnaceRecipe r = new ArcFurnaceRecipe(CraftTweakerHelper.toStack(output), oInput, CraftTweakerHelper.toStack(slag), time, energyPerTick, adds);
-		if(specialRecipeType != null)
+		if(specialRecipeType!=null)
 			r.setSpecialRecipeType(specialRecipeType);
 		CraftTweakerAPI.apply(new Add(r));
 	}
@@ -56,13 +55,12 @@ public class ArcFurnace
 		public void apply()
 		{
 			ArcFurnaceRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding ArcFurnace Recipe for " + recipe.output.getDisplayName();
+			return "Adding ArcFurnace Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -86,14 +84,12 @@ public class ArcFurnace
 		public void apply()
 		{
 			removedRecipes = ArcFurnaceRecipe.removeRecipes(output);
-			for(ArcFurnaceRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing ArcFurnace Recipe for " + output.getDisplayName();
+			return "Removing ArcFurnace Recipe for "+output.getDisplayName();
 		}
 	}
 }

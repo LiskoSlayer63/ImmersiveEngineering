@@ -13,11 +13,13 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
@@ -54,13 +56,28 @@ public interface IOBJModelCallback<T>
 	};
 
 	@SideOnly(Side.CLIENT)
-	default TextureAtlasSprite getTextureReplacement(T object, String material){ return null; }
+	default TextureAtlasSprite getTextureReplacement(T object, String material)
+	{
+		return null;
+	}
+
 	@SideOnly(Side.CLIENT)
-	default boolean shouldRenderGroup(T object, String group){ return true; }
+	default boolean shouldRenderGroup(T object, String group)
+	{
+		return true;
+	}
+
 	@SideOnly(Side.CLIENT)
-	default Optional<TRSRTransformation> applyTransformations(T object, String group, Optional<TRSRTransformation> transform) { return transform; }
+	default Optional<TRSRTransformation> applyTransformations(T object, String group, Optional<TRSRTransformation> transform)
+	{
+		return transform;
+	}
+
 	@SideOnly(Side.CLIENT)
-	default Matrix4 handlePerspective(T Object, TransformType cameraTransformType, Matrix4 perspective, @Nullable EntityLivingBase entity) { return perspective; }
+	default Matrix4 handlePerspective(T Object, TransformType cameraTransformType, Matrix4 perspective, @Nullable EntityLivingBase entity)
+	{
+		return perspective;
+	}
 
 	@SideOnly(Side.CLIENT)
 	default int getRenderColour(T object, String group)
@@ -80,20 +97,25 @@ public interface IOBJModelCallback<T>
 		return null;
 	}
 
-	/**
-	 * USE THIS SPARINGLY. IT'S PROBABLY HORRENDOUS FOR PERFORMANCE.
-	 */
+	String[][] EMPTY_STRING_A = new String[0][];
+
 	@SideOnly(Side.CLIENT)
-	default boolean isDynamicGroup(T object, String group)
+	default String[][] getSpecialGroups(ItemStack stack, TransformType transform, EntityLivingBase entity)
+	{
+		return IOBJModelCallback.EMPTY_STRING_A;
+	}
+
+	@SideOnly(Side.CLIENT)
+	@Nonnull
+	default Matrix4 getTransformForGroups(ItemStack stack, String[] groups, TransformType transform, EntityLivingBase entity,
+										  Matrix4 mat, float partialTicks)
+	{
+		return mat.setIdentity();
+	}
+
+	@SideOnly(Side.CLIENT)
+	default boolean areGroupsFullbright(ItemStack stack, String[] groups)
 	{
 		return false;
-	}
-	/**
-	 * USE THIS SPARINGLY. IT'S PROBABLY HORRENDOUS FOR PERFORMANCE.
-	 */
-	@SideOnly(Side.CLIENT)
-	default Matrix4 dynamicChanges(T object, String group, TransformType cameraTransformType, @Nullable EntityLivingBase entity)
-	{
-		return null;
 	}
 }

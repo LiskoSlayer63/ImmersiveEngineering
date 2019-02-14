@@ -26,13 +26,21 @@ import java.util.List;
 public interface IMultiblockRecipe
 {
 	List<IngredientStack> getItemInputs();
+
+	default boolean shouldCheckItemAvailability()
+	{
+		return true;
+	}
+
 	List<FluidStack> getFluidInputs();
+
 	NonNullList<ItemStack> getItemOutputs();
 
 	default NonNullList<ItemStack> getActualItemOutputs(TileEntity tile)
 	{
 		return getItemOutputs();
 	}
+
 	List<FluidStack> getFluidOutputs();
 
 	default ItemStack getDisplayStack(ItemStack input)
@@ -47,10 +55,12 @@ public interface IMultiblockRecipe
 	{
 		return getFluidOutputs();
 	}
-	
+
 	int getTotalProcessTime();
+
 	int getTotalProcessEnergy();
+
 	int getMultipleProcessTicks();
-	
+
 	NBTTagCompound writeToNBT(NBTTagCompound nbtTagCompound);
 }

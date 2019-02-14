@@ -10,7 +10,6 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.api.network.Node;
 import li.cil.oc.api.prefab.DriverSidedTileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -32,9 +31,9 @@ public class CrusherDriver extends DriverSidedTileEntity
 		TileEntity te = w.getTileEntity(bp);
 		if(te instanceof TileEntityCrusher)
 		{
-			TileEntityCrusher crush = (TileEntityCrusher) te;
+			TileEntityCrusher crush = (TileEntityCrusher)te;
 			TileEntityCrusher master = crush.master();
-			if(master != null && crush.isRedstonePos())
+			if(master!=null&&crush.isRedstonePos())
 				return new CrusherEnvironment(w, master.getPos(), TileEntityCrusher.class);
 		}
 		return null;
@@ -47,18 +46,11 @@ public class CrusherDriver extends DriverSidedTileEntity
 	}
 
 
-	public class CrusherEnvironment extends ManagedEnvironmentIE<TileEntityCrusher>
+	public class CrusherEnvironment extends ManagedEnvironmentIE.ManagedEnvMultiblock<TileEntityCrusher>
 	{
 		public CrusherEnvironment(World w, BlockPos bp, Class<? extends TileEntityIEBase> teClass)
 		{
 			super(w, bp, teClass);
-		}
-
-		@Callback(doc = "function(enable:boolean) -- enable or disable the crusher")
-		public Object[] setEnabled(Context context, Arguments args)
-		{
-			getTileEntity().computerOn = args.checkBoolean(0);
-			return null;
 		}
 
 		@Callback(doc = "function():number -- get energy storage capacity")
@@ -85,12 +77,12 @@ public class CrusherDriver extends DriverSidedTileEntity
 			TileEntityCrusher master = getTileEntity();
 			Map<Integer, Object> ret = new HashMap<>();
 			List<MultiblockProcess<CrusherRecipe>> queue = master.processQueue;
-			for (int i = 0;i<queue.size();i++)
+			for(int i = 0; i < queue.size(); i++)
 			{
 				MultiblockProcess<CrusherRecipe> currTmp = queue.get(i);
-				if (currTmp instanceof MultiblockProcessInWorld)
+				if(currTmp instanceof MultiblockProcessInWorld)
 				{
-					MultiblockProcessInWorld<CrusherRecipe> curr = (MultiblockProcessInWorld<CrusherRecipe>) currTmp;
+					MultiblockProcessInWorld<CrusherRecipe> curr = (MultiblockProcessInWorld<CrusherRecipe>)currTmp;
 					Map<String, Object> recipe = new HashMap<>();
 					recipe.put("progress", curr.processTick);
 					recipe.put("maxProgress", curr.maxTicks);
@@ -106,6 +98,20 @@ public class CrusherDriver extends DriverSidedTileEntity
 		}
 
 		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables computer control for the attached machine")
+		public Object[] enableComputerControl(Context context, Arguments args)
+		{
+			return super.enableComputerControl(context, args);
+		}
+
+		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables the machine. Call \"enableComputerControl(true)\" before using this and disable computer control before removing the computer")
+		public Object[] setEnabled(Context context, Arguments args)
+		{
+			return super.setEnabled(context, args);
+		}
+
+		@Override
 		public String preferredName()
 		{
 			return "ie_crusher";
@@ -115,25 +121,6 @@ public class CrusherDriver extends DriverSidedTileEntity
 		public int priority()
 		{
 			return 1000;
-		}
-
-		@Override
-		public void onConnect(Node node)
-		{
-			TileEntityCrusher te = getTileEntity();
-			if(te != null)
-			{
-				te.controllingComputers++;
-				te.computerOn = true;
-			}
-		}
-
-		@Override
-		public void onDisconnect(Node node)
-		{
-			TileEntityCrusher te = getTileEntity();
-			if(te != null)
-				te.controllingComputers--;
 		}
 	}
 }

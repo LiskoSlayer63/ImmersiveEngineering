@@ -21,18 +21,22 @@ public enum BlockTypes_MetalDecoration2 implements IStringSerializable, BlockIEB
 	ALUMINUM_WALLMOUNT,
 	LANTERN,
 	RAZOR_WIRE,
-	TOOLBOX;
+	TOOLBOX,
+	STEEL_SLOPE,
+	ALU_SLOPE;
 
 	@Override
 	public String getName()
 	{
 		return this.toString().toLowerCase(Locale.ENGLISH);
 	}
+
 	@Override
 	public int getMeta()
 	{
 		return ordinal();
 	}
+
 	@Override
 	public boolean listForCreative()
 	{

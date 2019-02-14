@@ -11,6 +11,7 @@ package blusunrize.immersiveengineering.common.util.compat;
 import blusunrize.immersiveengineering.common.Config;
 import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.compat.crafttweaker.CraftTweakerHelper;
+import blusunrize.immersiveengineering.common.util.compat.opencomputers.OCHelper;
 import blusunrize.immersiveengineering.common.util.compat.waila.WailaHelper;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
@@ -20,21 +21,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public abstract class IECompatModule
 {
 	public static HashMap<String, Class<? extends IECompatModule>> moduleClasses = new HashMap<String, Class<? extends IECompatModule>>();
 	public static Set<IECompatModule> modules = new HashSet<IECompatModule>();
 
-	public static Consumer<Object> jeiAddFunc = o -> {};
-	public static Consumer<Object> jeiRemoveFunc = o -> {};
-
 	static
 	{
 		moduleClasses.put("actuallyadditions", ActuallyAdditionsHelper.class);
 		moduleClasses.put("albedo", AlbedoHelper.class);
-		moduleClasses.put("attaineddrops", AttainedDropsHelper.class);
+		moduleClasses.put("attaineddrops2", AttainedDropsHelper.class);
 		moduleClasses.put("baubles", BaublesHelper.class);
 		moduleClasses.put("betterwithmods", BetterWithModsHelper.class);
 		moduleClasses.put("bloodmagic", BloodMagicHelper.class);
@@ -50,8 +47,9 @@ public abstract class IECompatModule
 		moduleClasses.put("foundry", FoundryHelper.class);
 		moduleClasses.put("harvestcraft", HarvestcraftHelper.class);
 		moduleClasses.put("ic2", IC2Helper.class);
+		moduleClasses.put("inspirations", InspirationsHelper.class);
 		moduleClasses.put("mysticalagriculture", MysticalAgricultureHelper.class);
-//		moduleClasses.put("opencomputers", OCHelper.class); ToDo: OpenComputers
+		moduleClasses.put("opencomputers", OCHelper.class);
 		moduleClasses.put("theoneprobe", OneProbeHelper.class);
 		moduleClasses.put("tconstruct", TConstructHelper.class);
 		moduleClasses.put("thermalfoundation", ThermalFoundationHelper.class);
@@ -85,63 +83,86 @@ public abstract class IECompatModule
 				try
 				{
 					//IC2 Classic is not supported.
-					if("IC2".equals(e.getKey())&&Loader.isModLoaded("IC2-Classic-Spmod"))
+					if("ic2".equals(e.getKey())&&Loader.isModLoaded("ic2-classic-spmod"))
 						continue;
 
 					Boolean enabled = Config.IEConfig.compat.get(e.getKey());
-					if(enabled==null||!enabled.booleanValue())
+					if(enabled==null||!enabled)
 						continue;
 					IECompatModule m = e.getValue().newInstance();
 					modules.add(m);
 					m.preInit();
 				} catch(Exception exception)
 				{
-					IELogger.error("Compat module for "+e.getKey()+" could not be preInitialized. Report this!");
+					IELogger.logger.error("Compat module for "+e.getKey()+" could not be preInitialized. Report this and include the error message below!", exception);
 				}
 	}
+
 	public static void doModulesInit()
 	{
 		for(IECompatModule compat : IECompatModule.modules)
-			try{
+			try
+			{
 				compat.init();
-			}catch (Exception exception){
-				IELogger.error("Compat module for "+compat+" could not be initialized");
+			} catch(Exception exception)
+			{
+				IELogger.logger.error("Compat module for "+compat+" could not be initialized. Report this and include the error message below!", exception);
 			}
 	}
+
 	public static void doModulesPostInit()
 	{
 		for(IECompatModule compat : IECompatModule.modules)
-			try{
+			try
+			{
 				compat.postInit();
-			}catch (Exception exception){
-				IELogger.error("Compat module for "+compat+" could not be postInitialized");
+			} catch(Exception exception)
+			{
+				IELogger.logger.error("Compat module for "+compat+" could not be postInitialized. Report this and include the error message below!", exception);
 			}
 	}
+
 	//We don't want this to happen multiple times after all >_>
 	public static boolean serverStartingDone = false;
+
 	public static void doModulesLoadComplete()
 	{
 		if(!serverStartingDone)
 		{
 			serverStartingDone = true;
 			for(IECompatModule compat : IECompatModule.modules)
-				try{
+				try
+				{
 					compat.loadComplete();
-				}catch (Exception exception){
-					IELogger.error("Compat module for "+compat+" could not be initialized");
-					exception.printStackTrace();
+				} catch(Exception exception)
+				{
+					IELogger.logger.error("Compat module for "+compat+" could not be initialized. Report this and include the error message below!", exception);
 				}
 		}
 	}
 
 	public abstract void preInit();
+
 	public abstract void init();
+
 	public abstract void postInit();
-	public void loadComplete(){}
+
+	public void loadComplete()
+	{
+	}
+
 	@SideOnly(Side.CLIENT)
-	public void clientPreInit(){}
+	public void clientPreInit()
+	{
+	}
+
 	@SideOnly(Side.CLIENT)
-	public void clientInit(){}
+	public void clientInit()
+	{
+	}
+
 	@SideOnly(Side.CLIENT)
-	public void clientPostInit(){}
+	public void clientPostInit()
+	{
+	}
 }

@@ -18,6 +18,7 @@ public class ShaderCaseItem extends ShaderCase
 	{
 		super(layers);
 	}
+
 	public ShaderCaseItem(Collection<ShaderLayer> layers)
 	{
 		super(layers);
@@ -39,10 +40,5 @@ public class ShaderCaseItem extends ShaderCase
 	public boolean renderModelPartForPass(ItemStack shader, ItemStack item, String modelPart, int pass)
 	{
 		return true;
-	}
-
-	@Override
-	public void modifyRender(ItemStack shader, ItemStack item, String modelPart, int pass, boolean pre, boolean inventory)
-	{
 	}
 }

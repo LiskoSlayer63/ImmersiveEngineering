@@ -18,6 +18,7 @@ public class ShaderCaseBalloon extends ShaderCase
 	{
 		super(layers);
 	}
+
 	public ShaderCaseBalloon(Collection<ShaderLayer> layers)
 	{
 		super(layers);
@@ -39,11 +40,6 @@ public class ShaderCaseBalloon extends ShaderCase
 	public boolean renderModelPartForPass(ItemStack shader, ItemStack item, String modelPart, int pass)
 	{
 		return true;
-	}
-
-	@Override
-	public void modifyRender(ItemStack shader, ItemStack item, String modelPart, int pass, boolean pre, boolean inventory)
-	{
 	}
 }
 //package blusunrize.immersiveengineering.api.shader;

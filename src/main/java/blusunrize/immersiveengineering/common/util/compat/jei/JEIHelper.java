@@ -10,10 +10,12 @@ package blusunrize.immersiveengineering.common.util.compat.jei;
 
 import blusunrize.immersiveengineering.api.crafting.*;
 import blusunrize.immersiveengineering.api.crafting.BlastFurnaceRecipe.BlastFurnaceFuel;
+import blusunrize.immersiveengineering.client.gui.*;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalMultiblock;
+import blusunrize.immersiveengineering.common.crafting.ArcRecyclingRecipe;
+import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import blusunrize.immersiveengineering.common.util.compat.jei.alloysmelter.AlloySmelterRecipeCategory;
 import blusunrize.immersiveengineering.common.util.compat.jei.arcfurnace.ArcFurnaceRecipeCategory;
 import blusunrize.immersiveengineering.common.util.compat.jei.blastfurnace.BlastFurnaceFuelCategory;
@@ -41,8 +43,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -59,27 +59,15 @@ public class JEIHelper implements IModPlugin
 	public void registerItemSubtypes(ISubtypeRegistry subtypeRegistry)
 	{
 		//NBT Ignorance
-		subtypeRegistry.registerSubtypeInterpreter(Item.getItemFromBlock(IEContent.blockConveyor), new ISubtypeInterpreter()
-		{
-			@Nullable
-			@Override
-			public String getSubtypeInfo(@Nonnull ItemStack itemStack)
-			{
-				if(!itemStack.isEmpty()&&ItemNBTHelper.hasKey(itemStack, "conveyorType"))
-					return ItemNBTHelper.getString(itemStack, "conveyorType");
-				return null;
-			}
+		subtypeRegistry.registerSubtypeInterpreter(Item.getItemFromBlock(IEContent.blockConveyor), itemStack -> {
+			if(!itemStack.isEmpty()&&ItemNBTHelper.hasKey(itemStack, "conveyorType"))
+				return ItemNBTHelper.getString(itemStack, "conveyorType");
+			return ISubtypeInterpreter.NONE;
 		});
-		subtypeRegistry.registerSubtypeInterpreter(IEContent.itemBullet, new ISubtypeInterpreter()
-		{
-			@Nullable
-			@Override
-			public String getSubtypeInfo(@Nonnull ItemStack itemStack)
-			{
-				if(!itemStack.isEmpty()&&itemStack.getMetadata()==2&&ItemNBTHelper.hasKey(itemStack, "bullet"))
-					return ItemNBTHelper.getString(itemStack, "bullet");
-				return null;
-			}
+		subtypeRegistry.registerSubtypeInterpreter(IEContent.itemBullet, itemStack -> {
+			if(!itemStack.isEmpty()&&itemStack.getMetadata()==2&&ItemNBTHelper.hasKey(itemStack, "bullet"))
+				return ItemNBTHelper.getString(itemStack, "bullet");
+			return ISubtypeInterpreter.NONE;
 		});
 	}
 
@@ -107,10 +95,11 @@ public class JEIHelper implements IModPlugin
 		categories.put(SqueezerRecipe.class, new SqueezerRecipeCategory(guiHelper));
 		categories.put(FermenterRecipe.class, new FermenterRecipeCategory(guiHelper));
 		categories.put(RefineryRecipe.class, new RefineryRecipeCategory(guiHelper));
-		categories.put(ArcFurnaceRecipe.class, new ArcFurnaceRecipeCategory(guiHelper));
+		categories.put(ArcFurnaceRecipe.class, ArcFurnaceRecipeCategory.getDefault(guiHelper));
+		categories.put(ArcRecyclingRecipe.class, ArcFurnaceRecipeCategory.getRecycling(guiHelper));
 		categories.put(BottlingMachineRecipe.class, new BottlingMachineRecipeCategory(guiHelper));
 		categories.put(MixerRecipe.class, new MixerRecipeCategory(guiHelper));
-		registry.addRecipeCategories(categories.values().toArray(new IRecipeCategory[categories.size()]));
+		registry.addRecipeCategories(categories.values().toArray(new IRecipeCategory[0]));
 	}
 
 	@Override
@@ -124,6 +113,8 @@ public class JEIHelper implements IModPlugin
 		jeiHelpers.getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(IEContent.blockMetalMultiblock, 1, OreDictionary.WILDCARD_VALUE));
 
 		modRegistry.getRecipeTransferRegistry().addRecipeTransferHandler(new AssemblerRecipeTransferHandler(), VanillaRecipeCategoryUid.CRAFTING);
+		modRegistry.addGhostIngredientHandler(GuiIEContainerBase.class, new IEGhostItemHandler());
+		modRegistry.addGhostIngredientHandler(GuiFluidSorter.class, new FluidSorterGhostHandler());
 		modRegistry.addRecipeCatalyst(new ItemStack(IEContent.blockMetalMultiblock, 1, BlockTypes_MetalMultiblock.ASSEMBLER.getMeta()), VanillaRecipeCategoryUid.CRAFTING);
 
 		for(IERecipeCategory<Object, IRecipeWrapper> cat : categories.values())
@@ -133,37 +124,42 @@ public class JEIHelper implements IModPlugin
 		}
 //		modRegistry.addRecipeHandlers(categories);
 
-		modRegistry.addRecipes(new ArrayList(CokeOvenRecipe.recipeList), "ie.cokeoven");
-		modRegistry.addRecipes(new ArrayList(AlloyRecipe.recipeList), "ie.alloysmelter");
-		modRegistry.addRecipes(new ArrayList(BlastFurnaceRecipe.recipeList), "ie.blastfurnace");
-		modRegistry.addRecipes(new ArrayList(BlastFurnaceRecipe.blastFuels), "ie.blastfurnace.fuel");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(MetalPressRecipe.recipeList.values(), input -> input.listInJEI())), "ie.metalPress");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(CrusherRecipe.recipeList, input -> input.listInJEI())), "ie.crusher");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(BlueprintCraftingRecipe.recipeList.values(), input -> input.listInJEI())), "ie.workbench");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(SqueezerRecipe.recipeList, input -> input.listInJEI())), "ie.squeezer");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(FermenterRecipe.recipeList, input -> input.listInJEI())), "ie.fermenter");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(RefineryRecipe.recipeList, input -> input.listInJEI())), "ie.refinery");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(ArcFurnaceRecipe.recipeList, input -> input.listInJEI())), "ie.arcFurnace");
-		modRegistry.addRecipes(new ArrayList(Collections2.filter(BottlingMachineRecipe.recipeList, input -> input.listInJEI())), "ie.bottlingMachine");
+		IELogger.info("Adding recipes to JEI!!");
+		modRegistry.addRecipes(new ArrayList<>(CokeOvenRecipe.recipeList), "ie.cokeoven");
+		modRegistry.addRecipes(new ArrayList<>(AlloyRecipe.recipeList), "ie.alloysmelter");
+		modRegistry.addRecipes(new ArrayList<>(BlastFurnaceRecipe.recipeList), "ie.blastfurnace");
+		modRegistry.addRecipes(new ArrayList<>(BlastFurnaceRecipe.blastFuels), "ie.blastfurnace.fuel");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(MetalPressRecipe.recipeList.values(), IJEIRecipe::listInJEI)), "ie.metalPress");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(CrusherRecipe.recipeList, IJEIRecipe::listInJEI)), "ie.crusher");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(BlueprintCraftingRecipe.recipeList.values(), IJEIRecipe::listInJEI)), "ie.workbench");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(SqueezerRecipe.recipeList, IJEIRecipe::listInJEI)), "ie.squeezer");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(FermenterRecipe.recipeList, IJEIRecipe::listInJEI)), "ie.fermenter");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(RefineryRecipe.recipeList, IJEIRecipe::listInJEI)), "ie.refinery");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(ArcFurnaceRecipe.recipeList, input -> input instanceof ArcRecyclingRecipe&&input.listInJEI())), "ie.arcFurnace.recycling");
+		modRegistry.addRecipes(new ArrayList<>(Collections2.filter(ArcFurnaceRecipe.recipeList, input -> {
+			return !(input instanceof ArcRecyclingRecipe)&&input.listInJEI();
+		})), "ie.arcFurnace");
+    modRegistry.addRecipes(new ArrayList(Collections2.filter(BottlingMachineRecipe.recipeList, input -> input.listInJEI())), "ie.bottlingMachine");
 		modRegistry.addRecipes(new ArrayList(Collections2.filter(MixerRecipe.recipeList, input -> input.listInJEI())), "ie.mixer");
+
+		// Allow jumping to recipies from the block GUIs.
+		modRegistry.addRecipeClickArea(GuiCokeOven.class, 58, 36, 11, 13, "ie.cokeoven");
+		modRegistry.addRecipeClickArea(GuiAlloySmelter.class, 84, 35, 22, 16, "ie.alloysmelter");
+		modRegistry.addRecipeClickArea(GuiBlastFurnace.class, 76, 35, 22, 15, "ie.blastfurnace", "ie.blastfurnace.fuel");
+
+		modRegistry.addRecipeClickArea(GuiSqueezer.class, 110, 19, 20, 51, "ie.squeezer");
+		modRegistry.addRecipeClickArea(GuiFermenter.class, 110, 19, 20, 51, "ie.fermenter");
+		modRegistry.addRecipeClickArea(GuiRefinery.class, 83, 36, 20, 13, "ie.refinery");
+		modRegistry.addRecipeClickArea(GuiArcFurnace.class, 81, 38, 23, 35, "ie.arcFurnace", "ie.arcFurnace.recycling");
+		modRegistry.addRecipeClickArea(GuiMixer.class, 76, 11, 58, 47, "ie.mixer");
+
+		modRegistry.addRecipeClickArea(GuiModWorkbench.class, 4, 41, 53, 18, "ie.workbench");
+		modRegistry.addRecipeClickArea(GuiAutoWorkbench.class, 90, 12, 39, 37, "ie.workbench");
 	}
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime)
 	{
-		final IRecipeRegistry registry = jeiRuntime.getRecipeRegistry();
-		IECompatModule.jeiAddFunc = recipe ->
-		{
-			IERecipeCategory factory = getFactory(recipe.getClass());
-			if(factory!=null)
-				registry.addRecipe(factory.getRecipeWrapper(recipe), factory.getUid());
-		};
-		IECompatModule.jeiRemoveFunc = recipe ->
-		{
-			IERecipeCategory factory = getFactory(recipe.getClass());
-			if(factory!=null)
-				registry.removeRecipe(factory.getRecipeWrapper(recipe), factory.getUid());
-		};
 	}
 
 	private IERecipeCategory getFactory(Class recipeClass)

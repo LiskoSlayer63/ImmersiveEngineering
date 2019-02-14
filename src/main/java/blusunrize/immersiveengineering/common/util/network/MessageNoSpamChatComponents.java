@@ -10,6 +10,7 @@ package blusunrize.immersiveengineering.common.util.network;
 
 import blusunrize.immersiveengineering.common.util.ChatUtils;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -19,10 +20,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class MessageNoSpamChatComponents implements IMessage
 {
 	ITextComponent[] chatMessages;
+
 	public MessageNoSpamChatComponents(ITextComponent... chatMessages)
 	{
 		this.chatMessages = chatMessages;
 	}
+
 	public MessageNoSpamChatComponents()
 	{
 	}
@@ -32,7 +35,7 @@ public class MessageNoSpamChatComponents implements IMessage
 	{
 		int l = buf.readInt();
 		chatMessages = new ITextComponent[l];
-		for(int i=0; i<l; i++)
+		for(int i = 0; i < l; i++)
 			chatMessages[i] = ITextComponent.Serializer.jsonToComponent(ByteBufUtils.readUTF8String(buf));
 	}
 
@@ -49,7 +52,7 @@ public class MessageNoSpamChatComponents implements IMessage
 		@Override
 		public IMessage onMessage(MessageNoSpamChatComponents message, MessageContext ctx)
 		{
-			ChatUtils.sendClientNoSpamMessages(message.chatMessages);
+			Minecraft.getMinecraft().addScheduledTask(() -> ChatUtils.sendClientNoSpamMessages(message.chatMessages));
 			return null;
 		}
 	}

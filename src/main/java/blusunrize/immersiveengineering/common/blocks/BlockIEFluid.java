@@ -14,7 +14,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -35,11 +34,9 @@ public class BlockIEFluid extends BlockFluidClassic
 	public BlockIEFluid(String name, Fluid fluid, Material material)
 	{
 		super(fluid, material);
-		this.setUnlocalizedName(ImmersiveEngineering.MODID + "." + name);
+		this.setTranslationKey(ImmersiveEngineering.MODID+"."+name);
 		this.setCreativeTab(ImmersiveEngineering.creativeTab);
-//		ImmersiveEngineering.registerBlock(this, ItemBlock.class, name);
 		IEContent.registeredIEBlocks.add(this);
-		IEContent.registeredIEItems.add(new ItemBlock(this));
 	}
 
 	public BlockIEFluid setFlammability(int flammability, int fireSpread)
@@ -48,6 +45,7 @@ public class BlockIEFluid extends BlockFluidClassic
 		this.fireSpread = fireSpread;
 		return this;
 	}
+
 	public BlockIEFluid setPotionEffects(PotionEffect... potionEffects)
 	{
 		this.potionEffects = potionEffects;
@@ -59,22 +57,24 @@ public class BlockIEFluid extends BlockFluidClassic
 	{
 		return this.flammability;
 	}
+
 	@Override
 	public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
 	{
 		return fireSpread;
 	}
+
 	@Override
 	public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
 	{
-		return this.flammability>0;
+		return this.flammability > 0;
 	}
 
 
 	@Override
-	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity)
+	public void onEntityCollision(World world, BlockPos pos, IBlockState state, Entity entity)
 	{
-		if(potionEffects!=null && entity instanceof EntityLivingBase)
+		if(potionEffects!=null&&entity instanceof EntityLivingBase)
 		{
 			for(PotionEffect effect : potionEffects)
 				if(effect!=null)

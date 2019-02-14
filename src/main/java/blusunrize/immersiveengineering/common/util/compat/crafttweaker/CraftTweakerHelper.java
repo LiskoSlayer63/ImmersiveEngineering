@@ -39,6 +39,7 @@ public class CraftTweakerHelper extends IECompatModule
 		CraftTweakerAPI.registerClass(MetalPress.class);
 		CraftTweakerAPI.registerClass(Mixer.class);
 		CraftTweakerAPI.registerClass(DieselHelper.class);
+		CraftTweakerAPI.registerClass(Thermoelectric.class);
 	}
 
 	@Override
@@ -56,14 +57,14 @@ public class CraftTweakerHelper extends IECompatModule
 	 */
 	public static ItemStack toStack(IItemStack iStack)
 	{
-		if(iStack == null)
+		if(iStack==null)
 			return ItemStack.EMPTY;
-		return (ItemStack) iStack.getInternal();
+		return (ItemStack)iStack.getInternal();
 	}
 
 	public static Object toObject(IIngredient iStack)
 	{
-		if(iStack == null)
+		if(iStack==null)
 			return null;
 		else
 		{
@@ -75,11 +76,34 @@ public class CraftTweakerHelper extends IECompatModule
 			{
 				IIngredient ingr = ReflectionHelper.getPrivateValue(IngredientStack.class, (IngredientStack)iStack, "ingredient");
 				Object o = toObject(ingr);
-				if (o instanceof String)
-					return new blusunrize.immersiveengineering.api.crafting.IngredientStack((String) o, iStack.getAmount());
+				if(o instanceof String)
+					return new blusunrize.immersiveengineering.api.crafting.IngredientStack((String)o, iStack.getAmount());
 				else
 					return o;
-			} else
+			}
+			else
+				return null;
+		}
+	}
+
+	public static blusunrize.immersiveengineering.api.crafting.IngredientStack toIEIngredientStack(IIngredient iStack)
+	{
+		if(iStack==null)
+			return null;
+		else
+		{
+			if(iStack instanceof IOreDictEntry)
+				return new blusunrize.immersiveengineering.api.crafting.IngredientStack(((IOreDictEntry)iStack).getName());
+			else if(iStack instanceof IItemStack)
+				return new blusunrize.immersiveengineering.api.crafting.IngredientStack(toStack((IItemStack)iStack));
+			else if(iStack instanceof IngredientStack)
+			{
+				IIngredient ingr = ReflectionHelper.getPrivateValue(IngredientStack.class, (IngredientStack)iStack, "ingredient");
+				blusunrize.immersiveengineering.api.crafting.IngredientStack ingrStack = toIEIngredientStack(ingr);
+				ingrStack.inputSize = iStack.getAmount();
+				return ingrStack;
+			}
+			else
 				return null;
 		}
 	}
@@ -94,9 +118,10 @@ public class CraftTweakerHelper extends IECompatModule
 
 	public static FluidStack toFluidStack(ILiquidStack iStack)
 	{
-		if (iStack == null) {
+		if(iStack==null)
+		{
 			return null;
 		}
-		return (FluidStack) iStack.getInternal();
+		return (FluidStack)iStack.getInternal();
 	}
 }

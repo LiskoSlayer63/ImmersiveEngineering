@@ -12,10 +12,10 @@ import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
+import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntityFeedthrough;
-import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
@@ -42,7 +42,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -67,12 +66,13 @@ public class FeedthroughModel implements IBakedModel
 			.expireAfterAccess(2, TimeUnit.MINUTES)
 			.maximumSize(100)
 			.build();
+
 	public FeedthroughModel()
 	{
 		//TODO find a better place to put this
 		Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter =
 				(rl) -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(rl.toString());
-		for (WireApi.FeedthroughModelInfo f : INFOS.values())
+		for(WireApi.FeedthroughModelInfo f : INFOS.values())
 			f.onResourceReload(bakedTextureGetter, DefaultVertexFormats.ITEM);
 	}
 
@@ -87,15 +87,15 @@ public class FeedthroughModel implements IBakedModel
 		int offset = 1;
 		BlockPos p = null;
 		World w = null;
-		if (state instanceof IExtendedBlockState)
+		if(state instanceof IExtendedBlockState)
 		{
-			TileEntity te = ((IExtendedBlockState) state).getValue(IEProperties.TILEENTITY_PASSTHROUGH);
-			if (te instanceof TileEntityFeedthrough)
+			TileEntity te = ((IExtendedBlockState)state).getValue(IEProperties.TILEENTITY_PASSTHROUGH);
+			if(te instanceof TileEntityFeedthrough)
 			{
-				baseState = ((TileEntityFeedthrough) te).stateForMiddle;
-				wire = ((TileEntityFeedthrough) te).reference;
-				facing = ((TileEntityFeedthrough) te).getFacing();
-				offset = ((TileEntityFeedthrough) te).offset;
+				baseState = ((TileEntityFeedthrough)te).stateForMiddle;
+				wire = ((TileEntityFeedthrough)te).reference;
+				facing = ((TileEntityFeedthrough)te).getFacing();
+				offset = ((TileEntityFeedthrough)te).offset;
 				p = te.getPos();
 				w = te.getWorld();
 			}
@@ -106,9 +106,8 @@ public class FeedthroughModel implements IBakedModel
 		try
 		{
 			return CACHE.get(key,
-					()->new SpecificFeedthroughModel(key, wFinal, pFinal)).getQuads(state, side, rand);
-		}
-		catch (ExecutionException e)
+					() -> new SpecificFeedthroughModel(key, wFinal, pFinal)).getQuads(state, side, rand);
+		} catch(ExecutionException e)
 		{
 			e.printStackTrace();
 			return ImmutableList.of();
@@ -149,6 +148,7 @@ public class FeedthroughModel implements IBakedModel
 			new ItemTransformVec3f(new Vector3f(30, 225, 0), new Vector3f(0, 0, 0), new Vector3f(.6F, .6F, .6F)),//GUI
 			new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .3F, 0), new Vector3f(.25F, .25F, .25F)),//Ground
 			new ItemTransformVec3f(new Vector3f(0, 180, 45), new Vector3f(0, 0, -.1875F), new Vector3f(.5F, .5F, .5F)));
+
 	@Nonnull
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms()
@@ -164,6 +164,7 @@ public class FeedthroughModel implements IBakedModel
 	{
 		return INSTANCE;
 	}
+
 	private static class FeedthroughItemOverride extends ItemOverrideList
 	{
 
@@ -183,14 +184,13 @@ public class FeedthroughModel implements IBakedModel
 		public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
 		{
 			Item connItem = Item.getItemFromBlock(IEContent.blockConnectors);
-			if (stack != null && stack.getItem() == connItem && stack.getMetadata() == BlockTypes_Connector.FEEDTHROUGH.ordinal())
+			if(stack!=null&&stack.getItem()==connItem&&stack.getMetadata()==BlockTypes_Connector.FEEDTHROUGH.ordinal())
 			{
 				try
 				{
 					return ITEM_MODEL_CACHE.get(stack, () ->
 							new SpecificFeedthroughModel(stack));
-				}
-				catch (ExecutionException e)
+				} catch(ExecutionException e)
 				{
 					e.printStackTrace();
 				}
@@ -221,13 +221,13 @@ public class FeedthroughModel implements IBakedModel
 		@Override
 		public boolean equals(Object o)
 		{
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			FeedthroughCacheKey that = (FeedthroughCacheKey) o;
-			return offset == that.offset &&
-					Objects.equals(type, that.type) &&
-					Utils.areStatesEqual(baseState, that.baseState, ImmutableSet.of(), false) &&
-					facing == that.facing &&
+			if(this==o) return true;
+			if(o==null||getClass()!=o.getClass()) return false;
+			FeedthroughCacheKey that = (FeedthroughCacheKey)o;
+			return offset==that.offset&&
+					Objects.equals(type, that.type)&&
+					Utils.areStatesEqual(baseState, that.baseState, ImmutableSet.of(), false)&&
+					facing==that.facing&&
 					Objects.equals(layer, that.layer);
 		}
 
@@ -238,9 +238,16 @@ public class FeedthroughModel implements IBakedModel
 			return 31*ret+Objects.hash(type, offset, facing, layer);
 		}
 	}
+
 	private static class SpecificFeedthroughModel extends FeedthroughModel
 	{
+		private static final float[] WHITE = {1, 1, 1, 1};
+		private static final Vector3f[] vertices = {
+				new Vector3f(.75F, .001F, .75F), new Vector3f(.75F, .001F, .25F),
+				new Vector3f(.25F, .001F, .25F), new Vector3f(.25F, .001F, .75F)
+		};
 		List<List<BakedQuad>> quads = new ArrayList<>(6);
+
 		public SpecificFeedthroughModel(ItemStack stack)
 		{
 			WireType w = WireType.getValue(ItemNBTHelper.getString(stack, WIRE));
@@ -258,25 +265,25 @@ public class FeedthroughModel implements IBakedModel
 			IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes()
 					.getModelForState(k.baseState);
 			Function<Integer, Integer> colorMultiplier = null;
-			if (world!=null&&pos!=null)
+			if(world!=null&&pos!=null)
 			{
 				BlockColors colors = Minecraft.getMinecraft().getBlockColors();
-				colorMultiplier = (i)->colors.colorMultiplier(k.baseState, world, pos, i);
+				colorMultiplier = (i) -> colors.colorMultiplier(k.baseState, world, pos, i);
 			}
 			else
 			{
 				ItemColors colors = Minecraft.getMinecraft().getItemColors();
 				ItemStack stack = new ItemStack(k.baseState.getBlock(), 1, k.baseState.getBlock().getMetaFromState(k.baseState));
-				colorMultiplier = (i)->colors.colorMultiplier(stack, i);
+				colorMultiplier = (i) -> colors.colorMultiplier(stack, i);
 			}
-			for (int j = 0; j < 7; j++)
+			for(int j = 0; j < 7; j++)
 			{
-				EnumFacing side = j<6?EnumFacing.VALUES[j]:null;
+				EnumFacing side = j < 6?EnumFacing.VALUES[j]: null;
 				EnumFacing facing = k.facing;
-				switch (k.offset)
+				switch(k.offset)
 				{
 					case 0:
-						if (k.baseState.getBlock().canRenderInLayer(k.baseState, k.layer))
+						if(k.layer==null||k.baseState.getBlock().canRenderInLayer(k.baseState, k.layer))
 						{
 							Function<BakedQuad, BakedQuad> tintTransformer = ApiUtils.transformQuad(new Matrix4(),
 									DefaultVertexFormats.ITEM, colorMultiplier);
@@ -287,7 +294,7 @@ public class FeedthroughModel implements IBakedModel
 					case 1:
 						facing = facing.getOpposite();
 					case -1:
-						if (k.layer==BlockRenderLayer.SOLID)
+						if(k.layer==BlockRenderLayer.SOLID)
 							quads.add(getConnQuads(facing, side, k.type, new Matrix4()));
 						break;
 					case Integer.MAX_VALUE:
@@ -304,7 +311,7 @@ public class FeedthroughModel implements IBakedModel
 						quads.add(all);
 						break;
 				}
-				if (quads.size()<=j)
+				if(quads.size() <= j)
 					quads.add(ImmutableList.of());
 			}
 		}
@@ -314,41 +321,24 @@ public class FeedthroughModel implements IBakedModel
 			//connector model+feedthrough border
 			WireApi.FeedthroughModelInfo info = INFOS.get(type);
 			mat.translate(.5, .5, .5);
-			if (facing.getAxis() == Y)
+			if(facing.getAxis()==Y)
 			{
-				if (facing == EnumFacing.UP)
+				if(facing==EnumFacing.UP)
 					mat.rotate(Math.PI, 1, 0, 0);
 			}
 			else
 			{
 				EnumFacing rotateAround = facing.rotateAround(Y);
-				mat.rotate(Math.PI / 2, rotateAround.getFrontOffsetX(), rotateAround.getFrontOffsetY(),
-						rotateAround.getFrontOffsetZ());
+				mat.rotate(Math.PI/2, rotateAround.getXOffset(), rotateAround.getYOffset(),
+						rotateAround.getZOffset());
 			}
 			mat.translate(-.5, -.5, -.5);
 			List<BakedQuad> conn = new ArrayList<>(info.model.getQuads(null, side, 0));
-			if (side == facing)
-			{
-				UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM);
-				TextureAtlasSprite tex = info.tex;
-				builder.setTexture(tex);
-				builder.setQuadOrientation(facing);
-				builder.setQuadTint(-1);
-				for (int i = 0; i < 4; i++)
-				{
-					int x = i < 2 ? 1 : 0;
-					int y = i == 0 || i == 3 ? 1 : 0;
-					builder.put(0, .25F + .5F * x, .001F, .25F + .5F * y);
-					builder.put(1, 1, 1, 1, 1);
-					builder.put(2, tex.getInterpolatedU(info.uvs[x * 2]), tex.getInterpolatedV(info.uvs[y * 2 + 1]));
-					builder.put(3, 0, 1, 0);
-					builder.put(4, 0);
-				}
-				conn.add(builder.build());
-			}
-			Function<BakedQuad, BakedQuad> transf = ApiUtils.transformQuad(mat, DefaultVertexFormats.ITEM,
+			if(side==facing)
+				conn.add(ClientUtils.createBakedQuad(DefaultVertexFormats.ITEM, vertices, EnumFacing.UP, info.tex, info.uvs, WHITE, false));
+			Function<BakedQuad, BakedQuad> transf = ApiUtils.transformQuad(mat, null,
 					null);//I hope no one uses tint index for connectors
-			if (transf != null)
+			if(transf!=null)
 				return conn.stream().map(transf).collect(Collectors.toList());
 			else
 				return conn;
@@ -358,7 +348,7 @@ public class FeedthroughModel implements IBakedModel
 		@Override
 		public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand)
 		{
-			return quads.get(side==null?6:side.getIndex());
+			return quads.get(side==null?6: side.getIndex());
 		}
 	}
 }

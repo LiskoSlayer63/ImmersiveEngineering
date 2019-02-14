@@ -25,12 +25,9 @@ public class BottlingMachineRecipeWrapper extends MultiblockRecipeWrapper
 	@Override
 	public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
+		ClientUtils.drawSlot(101, 13, 16, 16);
 		GlStateManager.pushMatrix();
-
-		ClientUtils.drawSlot(1,13,16,16);
-		ClientUtils.drawSlot(101,13,16,16);
-		ClientUtils.drawSlot(75,15, 16,48);
-
+		GlStateManager.enableDepth();
 		ClientUtils.bindAtlas();
 		GlStateManager.translate(45F, 20F, 16.5F);
 		GlStateManager.scale(50, -50, 50);

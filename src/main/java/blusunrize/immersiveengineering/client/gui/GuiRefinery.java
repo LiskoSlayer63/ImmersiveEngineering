@@ -11,19 +11,20 @@ package blusunrize.immersiveengineering.client.gui;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntityRefinery;
 import blusunrize.immersiveengineering.common.gui.ContainerRefinery;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.InventoryPlayer;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
 public class GuiRefinery extends GuiIEContainerBase
 {
 	TileEntityRefinery tile;
+
 	public GuiRefinery(InventoryPlayer inventoryPlayer, TileEntityRefinery tile)
 	{
 		super(new ContainerRefinery(inventoryPlayer, tile));
-		this.tile=tile;
+		this.tile = tile;
 	}
 
 	@Override
@@ -31,26 +32,25 @@ public class GuiRefinery extends GuiIEContainerBase
 	{
 		super.drawScreen(mx, my, partial);
 		ArrayList<String> tooltip = new ArrayList();
-		ClientUtils.handleGuiTank(tile.tanks[0], guiLeft+ 13,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", tooltip);
-		ClientUtils.handleGuiTank(tile.tanks[1], guiLeft+ 61,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", tooltip);
-		ClientUtils.handleGuiTank(tile.tanks[2], guiLeft+109,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", tooltip);
-		if(mx>guiLeft+157&&mx<guiLeft+164 && my>guiTop+21&&my<guiTop+67)
-			tooltip.add(tile.getEnergyStored(null)+"/"+tile.getMaxEnergyStored(null)+" RF");
+		ClientUtils.handleGuiTank(tile.tanks[0], guiLeft+13, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", tooltip);
+		ClientUtils.handleGuiTank(tile.tanks[1], guiLeft+61, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", tooltip);
+		ClientUtils.handleGuiTank(tile.tanks[2], guiLeft+109, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", tooltip);
+		if(mx > guiLeft+157&&mx < guiLeft+164&&my > guiTop+21&&my < guiTop+67)
+			tooltip.add(tile.getEnergyStored(null)+"/"+tile.getMaxEnergyStored(null)+" IF");
 
 		if(!tooltip.isEmpty())
 		{
-			ClientUtils.drawHoveringText(tooltip, mx, my, fontRenderer, guiLeft+xSize,-1);
+			ClientUtils.drawHoveringText(tooltip, mx, my, fontRenderer, guiLeft+xSize, -1);
 			RenderHelper.enableGUIStandardItemLighting();
 		}
 	}
 
-
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int mx, int my)
 	{
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		ClientUtils.bindTexture("immersiveengineering:textures/gui/refinery.png");
-		this.drawTexturedModalRect(guiLeft,guiTop, 0, 0, xSize, ySize);
+		this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 
 		//		if(tile.tick>0)
 		//		{
@@ -59,13 +59,13 @@ public class GuiRefinery extends GuiIEContainerBase
 		//		}
 
 		int stored = (int)(46*(tile.getEnergyStored(null)/(float)tile.getMaxEnergyStored(null)));
-		ClientUtils.drawGradientRect(guiLeft+157,guiTop+21+(46-stored), guiLeft+164,guiTop+67, 0xffb51500, 0xff600b00);
+		ClientUtils.drawGradientRect(guiLeft+157, guiTop+21+(46-stored), guiLeft+164, guiTop+67, 0xffb51500, 0xff600b00);
 
-		ClientUtils.handleGuiTank(tile.tanks[0], guiLeft+ 13,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", null);
-		ClientUtils.handleGuiTank(tile.tanks[1], guiLeft+ 61,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", null);
-		ClientUtils.handleGuiTank(tile.tanks[2], guiLeft+109,guiTop+20, 16,47, 177,31,20,51, mx,my, "immersiveengineering:textures/gui/refinery.png", null);
-		
-		
+		ClientUtils.handleGuiTank(tile.tanks[0], guiLeft+13, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", null);
+		ClientUtils.handleGuiTank(tile.tanks[1], guiLeft+61, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", null);
+		ClientUtils.handleGuiTank(tile.tanks[2], guiLeft+109, guiTop+20, 16, 47, 177, 31, 20, 51, mx, my, "immersiveengineering:textures/gui/refinery.png", null);
+
+
 		//		if(tile.tank.getFluid()!=null && tile.tank.getFluid().getFluid()!=null)
 		//		{
 		//			int h = (int)(47*(tile.tank.getFluid().amount/(float)tile.tank.getCapacity()));

@@ -13,10 +13,11 @@ import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.shader.ShaderRegistry;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -28,11 +29,13 @@ public class MessageShaderManual implements IMessage
 {
 	MessageType key;
 	String[] args;
+
 	public MessageShaderManual(MessageType key, String... args)
 	{
 		this.key = key;
 		this.args = args;
 	}
+
 	public MessageShaderManual()
 	{
 	}
@@ -43,7 +46,7 @@ public class MessageShaderManual implements IMessage
 		this.key = MessageType.values()[buf.readInt()];
 		int l = buf.readInt();
 		args = new String[l];
-		for(int i=0; i<l; i++)
+		for(int i = 0; i < l; i++)
 			args[i] = ByteBufUtils.readUTF8String(buf);
 	}
 
@@ -73,47 +76,55 @@ public class MessageShaderManual implements IMessage
 		@Override
 		public IMessage onMessage(MessageShaderManual message, MessageContext ctx)
 		{
-			if(message.key==MessageType.SYNC && message.args.length>0)
-			{
-				Collection<String> received = ShaderRegistry.receivedShaders.get(message.args[0]);
-				String[] ss = received.toArray(new String[received.size()+1]);
-				System.arraycopy(ss,0, ss,1, ss.length-1);
-				ss[0] = message.args[0];
-				ImmersiveEngineering.packetHandler.sendTo(new MessageShaderManual(MessageType.SYNC,ss), ctx.getServerHandler().player);
-			}
-			else if(message.key==MessageType.UNLOCK && message.args.length>1)
-			{
-				ShaderRegistry.receivedShaders.put(message.args[0], message.args[1]);
-			}
-			else if(message.key==MessageType.SPAWN && message.args.length>1)
-			{
-				EntityPlayer player = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUsername(message.args[0]);
-				if(!player.capabilities.isCreativeMode)
-					ApiUtils.consumePlayerIngredient(player, ShaderRegistry.shaderRegistry.get(message.args[1]).replicationCost);
-				ItemStack shaderStack = new ItemStack(ShaderRegistry.itemShader);
-				ItemNBTHelper.setString(shaderStack, "shader_name", message.args[1]);
-				EntityItem entityitem = player.dropItem(shaderStack, false);
-				if(entityitem != null)
+			EntityPlayerMP player = ctx.getServerHandler().player;
+			String playerName = player.getName();
+			player.getServerWorld().addScheduledTask(() -> {
+				if(message.key==MessageType.SYNC)
 				{
-					entityitem.setNoPickupDelay();
-					entityitem.setOwner(player.getName());
+					Collection<String> received = ShaderRegistry.receivedShaders.get(playerName);
+					String[] ss = received.toArray(new String[received.size()]);
+					ImmersiveEngineering.packetHandler.sendTo(new MessageShaderManual(MessageType.SYNC, ss), player);
 				}
-			}
+				else if(message.key==MessageType.UNLOCK&&message.args.length > 0)
+				{
+					ShaderRegistry.receivedShaders.put(playerName, message.args[0]);
+				}
+				else if(message.key==MessageType.SPAWN&&message.args.length > 0)
+				{
+					if(!player.capabilities.isCreativeMode)
+						ApiUtils.consumePlayerIngredient(player, ShaderRegistry.shaderRegistry.get(playerName).replicationCost);
+					ItemStack shaderStack = new ItemStack(ShaderRegistry.itemShader);
+					ItemNBTHelper.setString(shaderStack, "shader_name", message.args[0]);
+					EntityItem entityitem = player.dropItem(shaderStack, false);
+					if(entityitem!=null)
+					{
+						entityitem.setNoPickupDelay();
+						entityitem.setOwner(player.getName());
+					}
+				}
+			});
 			return null;
 		}
 	}
+
 	public static class HandlerClient implements IMessageHandler<MessageShaderManual, IMessage>
 	{
 		@Override
 		public IMessage onMessage(MessageShaderManual message, MessageContext ctx)
 		{
-			if(message.key==MessageType.SYNC && message.args.length>0)
-			{
-				String name = message.args[0];
-				for(int i=1; i<message.args.length; i++)
-					if(message.args[i]!=null)
-						ShaderRegistry.receivedShaders.put(name, message.args[i]);
-			}
+			Minecraft.getMinecraft().addScheduledTask(() -> {
+				if(message.key==MessageType.SYNC)
+				{
+					EntityPlayer player = ImmersiveEngineering.proxy.getClientPlayer();
+					if (player!=null)
+					{
+						String name = player.getName();
+						for(String shader : message.args)
+							if(shader!=null)
+								ShaderRegistry.receivedShaders.put(name, shader);
+					}
+				}
+			});
 			return null;
 		}
 	}

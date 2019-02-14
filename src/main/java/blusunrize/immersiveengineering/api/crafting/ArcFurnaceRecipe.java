@@ -56,16 +56,16 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 		else
 		{
 			this.additives = new IngredientStack[additives.length];
-			for(int i=0; i<additives.length; i++)
-				this.additives[i]=ApiUtils.createIngredientStack(additives[i]);
+			for(int i = 0; i < additives.length; i++)
+				this.additives[i] = ApiUtils.createIngredientStack(additives[i]);
 		}
 
 		this.inputList = Lists.newArrayList(this.input);
-		if(this.additives.length>0)
+		if(this.additives.length > 0)
 			this.inputList.addAll(Lists.newArrayList(this.additives));
 		this.outputList = ListUtils.fromItem(this.output);
 	}
-	
+
 	@Override
 	public void setupJEI()
 	{
@@ -87,7 +87,7 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt)
 	{
 		nbt.setTag("input", input.writeToNBT(new NBTTagCompound()));
-		if(this.additives.length>0)
+		if(this.additives.length > 0)
 		{
 			NBTTagList list = new NBTTagList();
 			for(IngredientStack add : this.additives)
@@ -96,6 +96,7 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 		}
 		return nbt;
 	}
+
 	public static ArcFurnaceRecipe loadFromNBT(NBTTagCompound nbt)
 	{
 		IngredientStack input = IngredientStack.readFromNBT(nbt.getCompoundTag("input"));
@@ -104,21 +105,21 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 		{
 			NBTTagList list = nbt.getTagList("additives", 10);
 			additives = new IngredientStack[list.tagCount()];
-			for(int i=0; i<additives.length; i++)
+			for(int i = 0; i < additives.length; i++)
 				additives[i] = IngredientStack.readFromNBT(list.getCompoundTagAt(i));
 		}
 		for(ArcFurnaceRecipe recipe : recipeList)
 			if(recipe.input.equals(input))
 			{
-				if(additives==null && recipe.additives.length<1)
+				if(additives==null&&recipe.additives.length < 1)
 					return recipe;
-				else if(additives!=null && recipe.additives.length==additives.length)
+				else if(additives!=null&&recipe.additives.length==additives.length)
 				{
 					boolean b = true;
-					for(int i=0; i<additives.length; i++)
+					for(int i = 0; i < additives.length; i++)
 						if(!additives[i].equals(recipe.additives[i]))
 						{
-							b=false;
+							b = false;
 							break;
 						}
 					if(b)
@@ -134,62 +135,80 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 		outputs.add(output);
 		return outputs;
 	}
+
 	public boolean matches(ItemStack input, NonNullList<ItemStack> additives)
 	{
-		if(this.input!=null && this.input.matches(input))
+		if(this.input!=null&&this.input.matches(input))
 		{
-			ArrayList<ItemStack> qAdd = new ArrayList<ItemStack>(additives.size());
-			for(ItemStack s : additives)
-				qAdd.add(s);
-
-			for(IngredientStack add : this.additives)
-				if(add!=null)
-				{
-					int addAmount = add.inputSize;
-					Iterator<ItemStack> it = qAdd.iterator();
-					while(it.hasNext())
-					{
-						ItemStack query = it.next();
-						if(!query.isEmpty())
-						{
-							if(add.matches(query))
-							{
-								if(query.getCount() > addAmount)
-								{
-									query.shrink(addAmount);
-									addAmount=0;
-								}
-								else
-								{
-									addAmount -= query.getCount();
-									query.setCount(0);
-								}
-							}
-							if(query.getCount() <= 0)
-								it.remove();
-							if(addAmount<=0)
-								break;
-						}
-					}
-
-					if(addAmount>0)
-						return false;
-				}
-			return true;
+			int[] consumed = getConsumedAdditives(additives, false);
+			return consumed!=null;
 		}
+
 		return false;
 	}
+
+	public int[] getConsumedAdditives(NonNullList<ItemStack> additives, boolean consume)
+	{
+		int[] consumed = new int[additives.size()];
+		for(IngredientStack add : this.additives)
+			if(add!=null)
+			{
+				int addAmount = add.inputSize;
+				Iterator<ItemStack> it = additives.iterator();
+				int i = 0;
+				while(it.hasNext())
+				{
+					ItemStack query = it.next();
+					if(!query.isEmpty())
+					{
+						if(add.matches(query))
+						{
+							if(query.getCount() > addAmount)
+							{
+								query.shrink(addAmount);
+								consumed[i] = addAmount;
+								addAmount = 0;
+							}
+							else
+							{
+								addAmount -= query.getCount();
+								consumed[i] = query.getCount();
+								query.setCount(0);
+							}
+						}
+						if(addAmount <= 0)
+							break;
+					}
+					i++;
+				}
+
+				if(addAmount > 0)
+				{
+					for(int j = 0; j < consumed.length; j++)
+						additives.get(j).grow(consumed[j]);
+					return null;
+				}
+			}
+		if(!consume)
+			for(int j = 0; j < consumed.length; j++)
+				additives.get(j).grow(consumed[j]);
+		return consumed;
+	}
+
+
 	public boolean isValidInput(ItemStack stack)
 	{
-		return this.input!=null && this.input.matches(stack);
+		return this.input!=null&&this.input.matches(stack);
 	}
+
 	public boolean isValidAdditive(ItemStack stack)
 	{
 		for(IngredientStack add : additives)
-			if(add!=null && add.matches(stack))
+			if(add!=null&&add.matches(stack))
 				return true;
 		return false;
 	}
+
 	public ArcFurnaceRecipe setSpecialRecipeType(String type)
 	{
 		this.specialRecipeType = type;
@@ -205,13 +224,15 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 			recipeList.add(recipe);
 		return recipe;
 	}
+
 	public static ArcFurnaceRecipe findRecipe(ItemStack input, NonNullList<ItemStack> additives)
 	{
 		for(ArcFurnaceRecipe recipe : recipeList)
-			if(recipe!=null && recipe.matches(input, additives))
+			if(recipe!=null&&recipe.matches(input, additives))
 				return recipe;
 		return null;
 	}
+
 	public static List<ArcFurnaceRecipe> removeRecipes(ItemStack stack)
 	{
 		List<ArcFurnaceRecipe> list = new ArrayList();
@@ -231,19 +252,21 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 	public static boolean isValidRecipeInput(ItemStack stack)
 	{
 		for(ArcFurnaceRecipe recipe : recipeList)
-			if(recipe!=null && recipe.isValidInput(stack))
+			if(recipe!=null&&recipe.isValidInput(stack))
 				return true;
 		return false;
 	}
+
 	public static boolean isValidRecipeAdditive(ItemStack stack)
 	{
 		for(ArcFurnaceRecipe recipe : recipeList)
-			if(recipe!=null && recipe.isValidAdditive(stack))
+			if(recipe!=null&&recipe.isValidAdditive(stack))
 				return true;
 		return false;
 	}
 
 	public static ArrayList recyclingAllowed = new ArrayList();
+
 	/**
 	 * Set an item/oredict-entry to be considered for recycling in the arc furnace. Tools and Armor should usually be auto-detected
 	 */
@@ -253,8 +276,10 @@ public class ArcFurnaceRecipe extends MultiblockRecipe
 	}
 
 	public static ArrayList invalidRecyclingOutput = new ArrayList();
+
 	/**
-	 * Set an item/oredict-entry to be an invalid output for the recycling process. Used for magical ingots that should be reclaimable or similar
+	 * Set an item/oredict-entry to be an invalid output for the recycling process.
+	 * Used for magical ingots that should not be reclaimable or similar
 	 */
 	public static void makeItemInvalidRecyclingOutput(Object stack)
 	{

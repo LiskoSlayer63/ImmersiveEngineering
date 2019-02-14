@@ -12,10 +12,9 @@ import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.common.entities.EntitySkylineHook;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -24,20 +23,19 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageSkyhookSync implements IMessage
 {
-	int entityID;
-	Connection connection;
-	BlockPos target;
-	Vec3d[] subPoints;
-	int targetPoint;
+	private int entityID;
+	private Connection connection;
+	private double linePos;
+	private double speed;
 
 	public MessageSkyhookSync(EntitySkylineHook entity)
 	{
 		entityID = entity.getEntityId();
-		connection = entity.connection;
-		target = entity.target;
-		subPoints = entity.subPoints;
-		targetPoint = entity.targetPoint;
+		connection = entity.getConnection();
+		linePos = entity.linePos;
+		speed = entity.horizontalSpeed;
 	}
+
 	public MessageSkyhookSync()
 	{
 	}
@@ -48,30 +46,17 @@ public class MessageSkyhookSync implements IMessage
 		entityID = buf.readInt();
 		NBTTagCompound tag = ByteBufUtils.readTag(buf);
 		connection = Connection.readFromNBT(tag);
-		target = new BlockPos(buf.readInt(),buf.readInt(),buf.readInt());
-		int l = buf.readInt();
-		subPoints = new Vec3d[l];
-		for(int i=0; i<l; i++)
-			subPoints[i] = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
-		targetPoint = buf.readInt();
+		linePos = buf.readDouble();
+		speed = buf.readDouble();
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
 		buf.writeInt(entityID);
-		ByteBufUtils.writeTag(buf,connection.writeToNBT());
-		buf.writeInt(target.getX());
-		buf.writeInt(target.getY());
-		buf.writeInt(target.getZ());
-		buf.writeInt(subPoints.length);
-		for(Vec3d v : subPoints)
-		{
-			buf.writeDouble(v.x);
-			buf.writeDouble(v.y);
-			buf.writeDouble(v.z);
-		}
-		buf.writeInt(targetPoint);
+		ByteBufUtils.writeTag(buf, connection.writeToNBT());
+		buf.writeDouble(linePos);
+		buf.writeDouble(speed);
 	}
 
 	public static class Handler implements IMessageHandler<MessageSkyhookSync, IMessage>
@@ -79,18 +64,18 @@ public class MessageSkyhookSync implements IMessage
 		@Override
 		public IMessage onMessage(MessageSkyhookSync message, MessageContext ctx)
 		{
-			World world = ImmersiveEngineering.proxy.getClientWorld();
-			if(world!=null)
-			{
-				Entity ent = world.getEntityByID(message.entityID);
-				if(ent instanceof EntitySkylineHook)
+			Minecraft.getMinecraft().addScheduledTask(() -> {
+				World world = ImmersiveEngineering.proxy.getClientWorld();
+				if(world!=null)
 				{
-					((EntitySkylineHook)ent).connection = message.connection;
-					((EntitySkylineHook)ent).target = message.target;
-					((EntitySkylineHook)ent).subPoints = message.subPoints;
-					((EntitySkylineHook)ent).targetPoint = message.targetPoint;
+					Entity ent = world.getEntityByID(message.entityID);
+					if(ent instanceof EntitySkylineHook)
+					{
+						message.connection.getSubVertices(world);
+						((EntitySkylineHook)ent).setConnectionAndPos(message.connection, message.linePos, message.speed);
+					}
 				}
-			}
+			});
 			return null;
 		}
 	}

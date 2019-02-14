@@ -24,17 +24,16 @@ import net.minecraft.item.ItemStack;
 public class MetalPressRecipeCategory extends IERecipeCategory<MetalPressRecipe, MetalPressRecipeWrapper>
 {
 	static ItemStack metalPressStack;
+
 	public MetalPressRecipeCategory(IGuiHelper helper)
 	{
-		super("metalPress","tile.immersiveengineering.metal_multiblock.metal_press.name", helper.createBlankDrawable(140,50), MetalPressRecipe.class, new ItemStack(IEContent.blockMetalMultiblock,1,BlockTypes_MetalMultiblock.METAL_PRESS.getMeta()));
-		metalPressStack = new ItemStack(IEContent.blockMetalMultiblock,1, BlockTypes_MetalMultiblock.METAL_PRESS.getMeta());
+		super("metalPress", "tile.immersiveengineering.metal_multiblock.metal_press.name", helper.createBlankDrawable(140, 50), MetalPressRecipe.class, new ItemStack(IEContent.blockMetalMultiblock, 1, BlockTypes_MetalMultiblock.METAL_PRESS.getMeta()));
+		metalPressStack = new ItemStack(IEContent.blockMetalMultiblock, 1, BlockTypes_MetalMultiblock.METAL_PRESS.getMeta());
 	}
 
 	@Override
 	public void drawExtras(Minecraft minecraft)
 	{
-		JEIHelper.slotDrawable.draw(minecraft, 20, 3);
-		JEIHelper.slotDrawable.draw(minecraft, 102, 3);
 	}
 
 	@Override
@@ -45,8 +44,10 @@ public class MetalPressRecipeCategory extends IERecipeCategory<MetalPressRecipe,
 		guiItemStacks.init(1, true, 71, 0);
 		guiItemStacks.init(2, false, 102, 3);
 		guiItemStacks.set(0, recipeWrapper.recipeInputs[0]);
+		guiItemStacks.setBackground(0, JEIHelper.slotDrawable);
 		guiItemStacks.set(1, recipeWrapper.recipeInputs[1]);
 		guiItemStacks.set(2, ingredients.getOutputs(ItemStack.class).get(0));
+		guiItemStacks.setBackground(2, JEIHelper.slotDrawable);
 	}
 
 	@Override

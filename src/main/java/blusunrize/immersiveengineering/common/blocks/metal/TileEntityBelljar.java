@@ -63,6 +63,10 @@ import java.util.Optional;
 
 public class TileEntityBelljar extends TileEntityIEBase implements ITickable, IDirectionalTile, IBlockBounds, IHasDummyBlocks, IIEInventory, IIEInternalFluxHandler, IGuiTile, IOBJModelCallback<IBlockState>
 {
+	public static final int SLOT_SOIL = 0;
+	public static final int SLOT_SEED = 1;
+	public static final int SLOT_FERTILIZER = 2;
+
 	public EnumFacing facing = EnumFacing.NORTH;
 	public int dummy = 0;
 	private NonNullList<ItemStack> inventory = NonNullList.withSize(7, ItemStack.EMPTY);
@@ -73,8 +77,14 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		{
 			TileEntityBelljar.this.sendSyncPacket(2);
 		}
+
+		@Override
+		public boolean canFillFluidType(FluidStack fluid)
+		{
+			return BelljarHandler.getFluidFertilizerHandler(fluid)!=null;
+		}
 	};
-	public FluxStorage energyStorage = new FluxStorage(16000,Math.max(256,IEConfig.Machines.belljar_consumption));
+	public FluxStorage energyStorage = new FluxStorage(16000, Math.max(256, IEConfig.Machines.belljar_consumption));
 
 	private IPlantHandler curPlantHandler;
 	public int fertilizerAmount = 0;
@@ -87,22 +97,24 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	public void update()
 	{
 		ApiUtils.checkForNeedlessTicking(this);
-		if(dummy!=0 || world.isBlockIndirectlyGettingPowered(getPos())>0)
+		if(dummy!=0||world.getRedstonePowerFromNeighbors(getPos()) > 0)
 			return;
+		ItemStack soil = inventory.get(SLOT_SOIL);
+		ItemStack seed = inventory.get(SLOT_SEED);
 		if(getWorld().isRemote)
 		{
-			if(energyStorage.getEnergyStored()>IEConfig.Machines.belljar_consumption && fertilizerAmount>0 && renderActive)
+			if(energyStorage.getEnergyStored() > IEConfig.Machines.belljar_consumption&&fertilizerAmount > 0&&renderActive)
 			{
 				IPlantHandler handler = getCurrentPlantHandler();
-				if(handler!=null&&handler.isCorrectSoil(inventory.get(1), inventory.get(0)) && fertilizerAmount>0)
+				if(handler!=null&&handler.isCorrectSoil(seed, soil)&&fertilizerAmount > 0)
 				{
-					if(renderGrowth<1)
+					if(renderGrowth < 1)
 					{
-						renderGrowth += handler.getGrowthStep(inventory.get(1), inventory.get(0), renderGrowth, this, fertilizerMod, true);
+						renderGrowth += handler.getGrowthStep(seed, soil, renderGrowth, this, fertilizerMod, true);
 						fertilizerAmount--;
 					}
 					else
-						renderGrowth = handler.resetGrowth(inventory.get(1), inventory.get(0), renderGrowth, this, true);
+						renderGrowth = handler.resetGrowth(seed, soil, renderGrowth, this, true);
 					if(Utils.RAND.nextInt(8)==0)
 					{
 						double partX = getPos().getX()+.5;
@@ -115,50 +127,54 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		}
 		else
 		{
-			if(!inventory.get(1).isEmpty())
+			if(!seed.isEmpty())
 			{
 				IPlantHandler handler = getCurrentPlantHandler();
-				if(handler!=null&&handler.isCorrectSoil(inventory.get(1), inventory.get(0)) && fertilizerAmount>0 && energyStorage.extractEnergy(IEConfig.Machines.belljar_consumption, true)==IEConfig.Machines.belljar_consumption)
+				if(handler!=null&&handler.isCorrectSoil(seed, soil)&&fertilizerAmount > 0&&energyStorage.extractEnergy(IEConfig.Machines.belljar_consumption, true)==IEConfig.Machines.belljar_consumption)
 				{
 					boolean consume = false;
 					if(growth >= 1)
 					{
-						ItemStack[] outputs = handler.getOutput(inventory.get(1), inventory.get(0), this);
+						ItemStack[] outputs = handler.getOutput(seed, soil, this);
 						int canFit = 0;
 						boolean[] emptySlotsUsed = new boolean[4];
-						for(int i=0; i<outputs.length; i++)
-							if(!outputs[i].isEmpty())
+						for(ItemStack output : outputs)
+							if(!output.isEmpty())
 								for(int j = 3; j < 7; j++)
-									if((inventory.get(j).isEmpty()&&!emptySlotsUsed[j-3])||(ItemHandlerHelper.canItemStacksStack(inventory.get(j), outputs[i])&&inventory.get(j).getCount()+outputs[i].getCount() <= inventory.get(j).getMaxStackSize()))
+								{
+									ItemStack existing = inventory.get(j);
+									if((existing.isEmpty()&&!emptySlotsUsed[j-3])||(ItemHandlerHelper.canItemStacksStack(existing, output)&&existing.getCount()+output.getCount() <= existing.getMaxStackSize()))
 									{
 										canFit++;
-										if(inventory.get(j).isEmpty())
+										if(existing.isEmpty())
 											emptySlotsUsed[j-3] = true;
 										break;
 									}
-						if(canFit>=outputs.length)
+								}
+						if(canFit >= outputs.length)
 						{
 							for(ItemStack output : outputs)
-								for(int j=3;j<7;j++)
+								for(int j = 3; j < 7; j++)
 								{
-									if(inventory.get(j).isEmpty())
+									ItemStack existing = inventory.get(j);
+									if(existing.isEmpty())
 									{
 										inventory.set(j, output.copy());
 										break;
 									}
-									else if(ItemHandlerHelper.canItemStacksStack(inventory.get(j), output)&& inventory.get(j).getCount()+output.getCount() <= inventory.get(j).getMaxStackSize())
+									else if(ItemHandlerHelper.canItemStacksStack(existing, output)&&existing.getCount()+output.getCount() <= existing.getMaxStackSize())
 									{
-										inventory.get(j).grow(output.getCount());
+										existing.grow(output.getCount());
 										break;
 									}
 								}
-							growth = handler.resetGrowth(inventory.get(1), inventory.get(0), growth, this, false);
+							growth = handler.resetGrowth(seed, soil, growth, this, false);
 							consume = true;
 						}
 					}
 					else if(growth < 1)
 					{
-						growth += Config.IEConfig.Machines.belljar_growth_mod * handler.getGrowthStep(inventory.get(1), inventory.get(0), growth, this, fertilizerMod, false);
+						growth += Config.IEConfig.Machines.belljar_growth_mod*handler.getGrowthStep(seed, soil, growth, this, fertilizerMod, false);
 						consume = true;
 						if(world.getTotalWorldTime()%32==((getPos().getX()^getPos().getZ())&31))
 							sendSyncPacket(0);
@@ -182,20 +198,21 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 				else
 					growth = 0;
 
-				if(fertilizerAmount<=0 && tank.getFluidAmount()>=IEConfig.Machines.belljar_fluid)
+				if(fertilizerAmount <= 0&&tank.getFluidAmount() >= IEConfig.Machines.belljar_fluid)
 				{
 					FluidFertilizerHandler fluidFert = BelljarHandler.getFluidFertilizerHandler(tank.getFluid());
 					if(fluidFert!=null)
 					{
-						fertilizerMod = fluidFert.getGrowthMultiplier(tank.getFluid(), inventory.get(1), inventory.get(0), this);
+						fertilizerMod = fluidFert.getGrowthMultiplier(tank.getFluid(), seed, soil, this);
 						tank.drain(IEConfig.Machines.belljar_fluid, true);
-						if(!inventory.get(2).isEmpty())
+						ItemStack fertilizer = inventory.get(SLOT_FERTILIZER);
+						if(!fertilizer.isEmpty())
 						{
-							ItemFertilizerHandler itemFert = BelljarHandler.getItemFertilizerHandler(inventory.get(2));
+							ItemFertilizerHandler itemFert = BelljarHandler.getItemFertilizerHandler(fertilizer);
 							if(itemFert!=null)
-								fertilizerMod *= itemFert.getGrowthMultiplier(inventory.get(2), inventory.get(1), inventory.get(0), this);
-							inventory.get(2).shrink(1);
-							if(inventory.get(2).getCount()<=0)
+								fertilizerMod *= itemFert.getGrowthMultiplier(fertilizer, seed, soil, this);
+							fertilizer.shrink(1);
+							if(fertilizer.getCount() <= 0)
 								inventory.set(2, ItemStack.EMPTY);
 						}
 						fertilizerAmount = IEConfig.Machines.belljar_fertilizer;
@@ -210,27 +227,31 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 			{
 				BlockPos outputPos = getPos().up().offset(facing.getOpposite());
 				TileEntity outputTile = Utils.getExistingTileEntity(world, outputPos);
-				if (outputTile != null)
-					for (int j = 3; j < 7; j++)
-						if (!inventory.get(j).isEmpty())
+				if(outputTile!=null)
+					for(int j = 3; j < 7; j++)
+					{
+						ItemStack outStack = inventory.get(j);
+						if(!outStack.isEmpty())
 						{
-							int out = Math.min(inventory.get(j).getCount(), 16);
-							ItemStack stack = Utils.copyStackWithAmount(inventory.get(j), out);
+							int outCount = Math.min(outStack.getCount(), 16);
+							ItemStack stack = Utils.copyStackWithAmount(outStack, outCount);
 							stack = Utils.insertStackIntoInventory(outputTile, stack, facing);
-							if (!stack.isEmpty())
-								out -= stack.getCount();
-							this.inventory.get(j).shrink(out);
-							if ((inventory.get(j).getCount()) <= 0)
+							if(!stack.isEmpty())
+								outCount -= stack.getCount();
+							outStack.shrink(outCount);
+							if(outStack.getCount() <= 0)
 								this.inventory.set(j, ItemStack.EMPTY);
 						}
+					}
 			}
 		}
 	}
 
 	public IPlantHandler getCurrentPlantHandler()
 	{
-		if(curPlantHandler==null || !curPlantHandler.isValid(inventory.get(1)))
-			curPlantHandler = BelljarHandler.getHandler(inventory.get(1));
+		ItemStack seed = inventory.get(SLOT_SEED);
+		if(curPlantHandler==null||!curPlantHandler.isValid(seed))
+			curPlantHandler = BelljarHandler.getHandler(seed);
 		return curPlantHandler;
 	}
 
@@ -250,8 +271,9 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		}
 		else if(type==2)
 			nbt.setTag("tank", tank.writeToNBT(new NBTTagCompound()));
-		ImmersiveEngineering.packetHandler.sendToAllAround(new MessageTileSync(this, nbt), new TargetPoint(world.provider.getDimension(),getPos().getX(), getPos().getY(), getPos().getZ(), 128));
+		ImmersiveEngineering.packetHandler.sendToAllAround(new MessageTileSync(this, nbt), new TargetPoint(world.provider.getDimension(), getPos().getX(), getPos().getY(), getPos().getZ(), 128));
 	}
+
 	@Override
 	public void receiveMessageFromServer(NBTTagCompound message)
 	{
@@ -272,9 +294,9 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	@Override
 	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket)
 	{
-		facing = EnumFacing.getFront(nbt.getInteger("facing"));
+		facing = EnumFacing.byIndex(nbt.getInteger("facing"));
 		dummy = nbt.getInteger("dummy");
-		inventory = Utils.readInventory(nbt.getTagList("inventory",10),7);
+		inventory = Utils.readInventory(nbt.getTagList("inventory", 10), 7);
 		energyStorage.readFromNBT(nbt);
 		tank.readFromNBT(nbt.getCompoundTag("tank"));
 		fertilizerAmount = nbt.getInteger("fertilizerAmount");
@@ -302,26 +324,31 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	{
 		return facing;
 	}
+
 	@Override
 	public void setFacing(EnumFacing facing)
 	{
 		this.facing = facing;
 	}
+
 	@Override
 	public int getFacingLimitation()
 	{
 		return 2;
 	}
+
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer)
 	{
 		return false;
 	}
+
 	@Override
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity)
 	{
 		return true;
 	}
+
 	@Override
 	public boolean canRotate(EnumFacing axis)
 	{
@@ -339,20 +366,22 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	{
 		return dummy!=0;
 	}
+
 	@Override
 	public void placeDummies(BlockPos pos, IBlockState state, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
-		for(int i=1; i<=2; i++)
+		for(int i = 1; i <= 2; i++)
 		{
 			world.setBlockState(pos.up(i), state);
 			((TileEntityBelljar)world.getTileEntity(pos.up(i))).dummy = i;
 			((TileEntityBelljar)world.getTileEntity(pos.up(i))).facing = facing;
 		}
 	}
+
 	@Override
 	public void breakDummies(BlockPos pos, IBlockState state)
 	{
-		for(int i=0; i<=2; i++)
+		for(int i = 0; i <= 2; i++)
 		{
 			BlockPos p = getPos().down(dummy).up(i);
 			if(world.getTileEntity(p) instanceof TileEntityBelljar)
@@ -365,16 +394,22 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	{
 		return inventory;
 	}
+
 	@Override
 	public boolean isStackValid(int slot, ItemStack stack)
 	{
-		return true;
+		if(slot==SLOT_FERTILIZER)
+			return BelljarHandler.getItemFertilizerHandler(stack)!=null;
+		else
+			return true;
 	}
+
 	@Override
 	public int getSlotLimit(int slot)
 	{
-		return slot<2?1:64;
+		return slot < 2?1: 64;
 	}
+
 	@Override
 	public void doGraphicalUpdates(int slot)
 	{
@@ -389,32 +424,34 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing facing)
 	{
-		if (getGuiMaster()!=null)
+		if(getGuiMaster()!=null)
 		{
-			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-				return dummy == 0 ? (facing == null || facing.getAxis() != this.facing.rotateY().getAxis()) : dummy == 1 && (facing == null || facing == this.facing.getOpposite());
-			else if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
-				return dummy == 0 && (facing == null || facing.getAxis() != this.facing.rotateY().getAxis());
+			if(capability==CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+				return dummy==0?(facing==null||facing.getAxis()!=this.facing.rotateY().getAxis()): dummy==1&&(facing==null||facing==this.facing.getOpposite());
+			else if(capability==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+				return dummy==0&&(facing==null||facing.getAxis()!=this.facing.rotateY().getAxis());
 		}
 		return super.hasCapability(capability, facing);
 	}
-	IItemHandler inputHandler = new IEInventoryHandler(1,this,2, true,false);
-	IItemHandler outputHandler = new IEInventoryHandler(4,this,3, false,true);
+
+	IItemHandler inputHandler = new IEInventoryHandler(1, this, 2, true, false);
+	IItemHandler outputHandler = new IEInventoryHandler(4, this, 3, false, true);
+
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing)
 	{
 		if(capability==CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 		{
-			if(dummy==0 && (facing==null||facing.getAxis()!=this.facing.rotateY().getAxis()))
+			if(dummy==0&&(facing==null||facing.getAxis()!=this.facing.rotateY().getAxis()))
 				return (T)inputHandler;
-			if(dummy==1 && (facing==null||facing==this.facing.getOpposite()))
+			if(dummy==1&&(facing==null||facing==this.facing.getOpposite()))
 			{
 				TileEntityBelljar te = getGuiMaster();
 				if(te!=null)
-					return (T) te.outputHandler;
+					return (T)te.outputHandler;
 			}
 		}
-		else if(capability==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && dummy==0 && (facing==null||facing.getAxis()!=this.facing.rotateY().getAxis()))
+		else if(capability==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY&&dummy==0&&(facing==null||facing.getAxis()!=this.facing.rotateY().getAxis()))
 			return (T)tank;
 		return super.getCapability(capability, facing);
 	}
@@ -424,11 +461,13 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	{
 		return true;
 	}
+
 	@Override
 	public int getGuiID()
 	{
 		return Lib.GUIID_Belljar;
 	}
+
 	@Override
 	public TileEntityBelljar getGuiMaster()
 	{
@@ -436,7 +475,7 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 			return this;
 		TileEntity te = world.getTileEntity(getPos().down(dummy));
 		if(te instanceof TileEntityBelljar)
-			return (TileEntityBelljar) te;
+			return (TileEntityBelljar)te;
 		return null;
 	}
 
@@ -445,7 +484,7 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 	@SideOnly(Side.CLIENT)
 	public TextureAtlasSprite getTextureReplacement(IBlockState object, String material)
 	{
-		if(!inventory.get(0).isEmpty() && "farmland".equals(material))
+		if(!inventory.get(SLOT_SOIL).isEmpty()&&"farmland".equals(material))
 		{
 			ResourceLocation rl = getSoilTexture();
 			if(rl!=null)
@@ -453,23 +492,26 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		}
 		return null;
 	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean shouldRenderGroup(IBlockState object, String group)
 	{
 		return !"glass".equals(group);
 	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Optional<TRSRTransformation> applyTransformations(IBlockState object, String group, Optional<TRSRTransformation> transform)
 	{
 		return transform;
 	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String getCacheKey(IBlockState object)
 	{
-		if(!inventory.get(0).isEmpty())
+		if(!inventory.get(SLOT_SOIL).isEmpty())
 		{
 			ResourceLocation rl = getSoilTexture();
 			if(rl!=null)
@@ -477,27 +519,29 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		}
 		return null;
 	}
+
 	@SideOnly(Side.CLIENT)
 	private ResourceLocation getSoilTexture()
 	{
-		ResourceLocation rl = curPlantHandler!=null?curPlantHandler.getSoilTexture(inventory.get(1), inventory.get(0), this):null;
+		ItemStack soil = inventory.get(SLOT_SOIL);
+		ResourceLocation rl = curPlantHandler!=null?curPlantHandler.getSoilTexture(inventory.get(SLOT_SEED), soil, this): null;
 		if(rl==null)
-			rl=BelljarHandler.getSoilTexture(inventory.get(0));
+			rl = BelljarHandler.getSoilTexture(soil);
 		if(rl==null)
 		{
 			try
 			{
-				IBlockState state = Utils.getStateFromItemStack(inventory.get(0));
+				IBlockState state = Utils.getStateFromItemStack(soil);
 				if(state!=null)
 					rl = ClientUtils.getSideTexture(state, EnumFacing.UP);
-			}catch(Exception e)
+			} catch(Exception e)
 			{
-				rl = ClientUtils.getSideTexture(inventory.get(0), EnumFacing.UP);
+				rl = ClientUtils.getSideTexture(soil, EnumFacing.UP);
 			}
 		}
-		if(rl==null && !inventory.get(0).isEmpty() && Utils.isFluidRelatedItemStack(inventory.get(0)))
+		if(rl==null&&!soil.isEmpty()&&Utils.isFluidRelatedItemStack(soil))
 		{
-			FluidStack fs = FluidUtil.getFluidContained(inventory.get(0));
+			FluidStack fs = FluidUtil.getFluidContained(soil);
 			if(fs!=null)
 				rl = fs.getFluid().getStill(fs);
 		}
@@ -516,13 +560,16 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 		}
 		return this.energyStorage;
 	}
+
 	@Nonnull
 	@Override
 	public SideConfig getEnergySideConfig(@Nullable EnumFacing facing)
 	{
-		return facing==null||(dummy==0&&facing.getAxis()==this.facing.rotateY().getAxis())||(dummy==2&&facing==EnumFacing.UP)?SideConfig.INPUT:SideConfig.NONE;
+		return facing==null||(dummy==0&&facing.getAxis()==this.facing.rotateY().getAxis())||(dummy==2&&facing==EnumFacing.UP)?SideConfig.INPUT: SideConfig.NONE;
 	}
+
 	IEForgeEnergyWrapper energyWrapper = new IEForgeEnergyWrapper(this, null);
+
 	@Override
 	public IEForgeEnergyWrapper getCapabilityWrapper(EnumFacing facing)
 	{
@@ -530,11 +577,13 @@ public class TileEntityBelljar extends TileEntityIEBase implements ITickable, ID
 			return energyWrapper;
 		return null;
 	}
+
 	AxisAlignedBB renderBB;
+
 	@Override
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		if (renderBB==null)
+		if(renderBB==null)
 			renderBB = new AxisAlignedBB(0, 0, 0, 1, 2, 1).offset(pos);
 		return renderBB;
 	}

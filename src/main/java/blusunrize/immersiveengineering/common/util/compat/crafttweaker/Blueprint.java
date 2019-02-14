@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.BlueprintCraftingRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -30,8 +29,8 @@ public class Blueprint
 	public static void addRecipe(String category, IItemStack output, IIngredient[] inputs)
 	{
 		Object[] oInputs = new Object[inputs.length];
-			for(int i = 0; i < inputs.length; i++)
-				oInputs[i] = CraftTweakerHelper.toObject(inputs[i]);
+		for(int i = 0; i < inputs.length; i++)
+			oInputs[i] = CraftTweakerHelper.toObject(inputs[i]);
 		BlueprintCraftingRecipe r = new BlueprintCraftingRecipe(category, CraftTweakerHelper.toStack(output), oInputs);
 		CraftTweakerAPI.apply(new Add(r));
 	}
@@ -52,13 +51,12 @@ public class Blueprint
 				BlueprintCraftingRecipe.blueprintCategories.add(recipe.blueprintCategory);
 			BlueprintCraftingRecipe.recipeList.put(recipe.blueprintCategory, recipe);
 //			CraftTweakerAPI.getIjeiRecipeRegistry().addRecipe(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Blueprint Recipe for " + recipe.output.getDisplayName();
+			return "Adding Blueprint Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -94,7 +92,6 @@ public class Blueprint
 					{
 						removedRecipes.add(ir);
 //						CraftTweakerAPI.getIjeiRecipeRegistry().removeRecipe(ir);
-						IECompatModule.jeiRemoveFunc.accept(ir);
 						it.remove();
 					}
 				}
@@ -106,7 +103,7 @@ public class Blueprint
 		@Override
 		public String describe()
 		{
-			return "Removing Blueprint Recipe for " + output.getDisplayName();
+			return "Removing Blueprint Recipe for "+output.getDisplayName();
 		}
 	}
 }

@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.api.shader;
 
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
 
@@ -19,6 +18,7 @@ public class ShaderCaseRevolver extends ShaderCase
 	{
 		super(layers);
 	}
+
 	public ShaderCaseRevolver(Collection<ShaderLayer> layers)
 	{
 		super(layers);
@@ -165,16 +165,4 @@ public class ShaderCaseRevolver extends ShaderCase
 //		if(this.additionalTexture!=null)
 //			i_revolverAdditional = ApiUtils.getRegisterSprite(map, this.baseTexturePath+additionalTexture);
 //	}
-
-	@Override
-	public void modifyRender(ItemStack shader, ItemStack item, String modelPart, int pass, boolean pre, boolean inventory)
-	{
-		if(modelPart.equals("cosmetic_compensator"))
-		{
-			if(pre)
-				GL11.glDisable(GL11.GL_CULL_FACE);
-			else
-				GL11.glEnable(GL11.GL_CULL_FACE);
-		}
-	}
 }

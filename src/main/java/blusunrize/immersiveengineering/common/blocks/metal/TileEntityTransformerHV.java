@@ -8,33 +8,32 @@
 
 package blusunrize.immersiveengineering.common.blocks.metal;
 
-import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.HV_CATEGORY;
 
 public class TileEntityTransformerHV extends TileEntityTransformer
 {
+	{
+		acceptableLowerWires = ImmutableSet.of(WireType.LV_CATEGORY, WireType.MV_CATEGORY);
+	}
+
 	@Override
 	protected boolean canTakeHV()
 	{
 		return true;
 	}
-	@Override
-	protected boolean canTakeLV()
-	{
-		return false;
-	}
 
 	@Override
-	protected float getLowerOffset() {
+	protected float getLowerOffset()
+	{
 		return super.getHigherOffset();
 	}
 
 	@Override
-	protected float getHigherOffset() {
+	protected float getHigherOffset()
+	{
 		return .75F;
 	}
 

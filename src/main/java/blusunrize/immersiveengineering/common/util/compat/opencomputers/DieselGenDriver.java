@@ -5,7 +5,6 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.api.network.Node;
 import li.cil.oc.api.prefab.DriverSidedTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -20,9 +19,9 @@ public class DieselGenDriver extends DriverSidedTileEntity
 		TileEntity te = w.getTileEntity(bp);
 		if(te instanceof TileEntityDieselGenerator)
 		{
-			TileEntityDieselGenerator gen = ((TileEntityDieselGenerator) te);
+			TileEntityDieselGenerator gen = ((TileEntityDieselGenerator)te);
 			TileEntityDieselGenerator master = gen.master();
-			if(master != null && gen.isRedstonePos())
+			if(master!=null&&gen.isRedstonePos())
 				return new DieselEnvironment(w, master.getPos());
 		}
 		return null;
@@ -34,19 +33,12 @@ public class DieselGenDriver extends DriverSidedTileEntity
 		return TileEntityDieselGenerator.class;
 	}
 
-	public class DieselEnvironment extends ManagedEnvironmentIE<TileEntityDieselGenerator>
+	public class DieselEnvironment extends ManagedEnvironmentIE.ManagedEnvMultiblock<TileEntityDieselGenerator>
 	{
 
 		public DieselEnvironment(World w, BlockPos bp)
 		{
 			super(w, bp, TileEntityDieselGenerator.class);
-		}
-
-		@Callback(doc = "function(enable:boolean) -- allow or disallow the generator to run when it can")
-		public Object[] setEnabled(Context context, Arguments args)
-		{
-			getTileEntity().computerOn = args.checkBoolean(0);
-			return null;
 		}
 
 		@Callback(doc = "function():boolean -- get whether the generator is currently producing energy")
@@ -62,6 +54,20 @@ public class DieselGenDriver extends DriverSidedTileEntity
 		}
 
 		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables computer control for the attached machine")
+		public Object[] enableComputerControl(Context context, Arguments args)
+		{
+			return super.enableComputerControl(context, args);
+		}
+
+		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables the machine. Call \"enableComputerControl(true)\" before using this and disable computer control before removing the computer")
+		public Object[] setEnabled(Context context, Arguments args)
+		{
+			return super.setEnabled(context, args);
+		}
+
+		@Override
 		public String preferredName()
 		{
 			return "ie_diesel_generator";
@@ -72,25 +78,5 @@ public class DieselGenDriver extends DriverSidedTileEntity
 		{
 			return 1000;
 		}
-
-		@Override
-		public void onConnect(Node node)
-		{
-			TileEntityDieselGenerator te = getTileEntity();
-			if(te != null)
-			{
-				te.controllingComputers++;
-				te.computerOn = true;
-			}
-		}
-
-		@Override
-		public void onDisconnect(Node node)
-		{
-			TileEntityDieselGenerator te = getTileEntity();
-			if(te != null)
-				te.controllingComputers--;
-		}
-
 	}
 }

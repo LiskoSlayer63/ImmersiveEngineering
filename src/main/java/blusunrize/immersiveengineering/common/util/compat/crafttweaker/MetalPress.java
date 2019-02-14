@@ -11,7 +11,6 @@ package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.ComparableItemStack;
 import blusunrize.immersiveengineering.api.crafting.MetalPressRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -31,13 +30,13 @@ public class MetalPress
 	public static void addRecipe(IItemStack output, IIngredient input, IItemStack mold, int energy, @Optional int inputSize)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 			return;
 		ItemStack sOut = CraftTweakerHelper.toStack(output);
 		ItemStack sMold = CraftTweakerHelper.toStack(mold);
-		if(!sOut.isEmpty() && !sMold.isEmpty())
+		if(!sOut.isEmpty()&&!sMold.isEmpty())
 		{
-			MetalPressRecipe r = new MetalPressRecipe(sOut, oInput, ApiUtils.createComparableItemStack(sMold), energy);
+			MetalPressRecipe r = new MetalPressRecipe(sOut, oInput, ApiUtils.createComparableItemStack(sMold, true), energy);
 			if(inputSize > 0)
 				r.setInputSize(inputSize);
 			CraftTweakerAPI.apply(new Add(r));
@@ -57,13 +56,12 @@ public class MetalPress
 		public void apply()
 		{
 			MetalPressRecipe.recipeList.put(recipe.mold, recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Metal Press Recipe for " + recipe.output.getDisplayName();
+			return "Adding Metal Press Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -87,14 +85,12 @@ public class MetalPress
 		public void apply()
 		{
 			removedRecipes = MetalPressRecipe.removeRecipes(output);
-			for(MetalPressRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Metal Press Recipes for " + output.getDisplayName();
+			return "Removing Metal Press Recipes for "+output.getDisplayName();
 		}
 	}
 
@@ -111,22 +107,20 @@ public class MetalPress
 
 		public RemoveByMold(ItemStack mold)
 		{
-			this.mold = ApiUtils.createComparableItemStack(mold);
+			this.mold = ApiUtils.createComparableItemStack(mold, true);
 		}
 
 		@Override
 		public void apply()
 		{
-			removedRecipes = new ArrayList(MetalPressRecipe.recipeList.get(mold));
+			removedRecipes = new ArrayList<>(MetalPressRecipe.recipeList.get(mold));
 			MetalPressRecipe.recipeList.removeAll(mold);
-			for(MetalPressRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Metal Press Recipes for Mold: " + mold.stack.getDisplayName();
+			return "Removing Metal Press Recipes for Mold: "+mold.stack.getDisplayName();
 		}
 	}
 }

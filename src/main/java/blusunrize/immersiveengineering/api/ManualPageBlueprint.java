@@ -20,8 +20,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +55,7 @@ public class ManualPageBlueprint extends ManualPages
 					{
 						int h = (int)Math.ceil(recipe.inputs.length/2f);
 						PositionedItemStack[] pIngredients = new PositionedItemStack[recipe.inputs.length+2];
-						for(int i=0; i<recipe.inputs.length; i++)
+						for(int i = 0; i < recipe.inputs.length; i++)
 							pIngredients[i] = new PositionedItemStack(recipe.inputs[i].getSizedStackList(), 32+i%2*18, i/2*18);
 						int middle = (int)(h/2f*18)-8;
 						pIngredients[pIngredients.length-2] = new PositionedItemStack(recipe.output, 86, middle);
@@ -91,7 +89,7 @@ public class ManualPageBlueprint extends ManualPages
 	@Override
 	public void renderPage(GuiManual gui, int x, int y, int mx, int my)
 	{
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+		GlStateManager.enableRescaleNormal();
 		RenderHelper.enableGUIStandardItemLighting();
 
 		highlighted = ItemStack.EMPTY;
@@ -111,7 +109,7 @@ public class ManualPageBlueprint extends ManualPages
 
 		}
 
-		GL11.glTranslated(0, 0, 300);
+		GlStateManager.translate(0, 0, 300);
 		boolean uni = manual.fontRenderer.getUnicodeFlag();
 		manual.fontRenderer.setUnicodeFlag(false);
 		/**RenderItem.getInstance().renderWithColor=true;*/
@@ -129,8 +127,8 @@ public class ManualPageBlueprint extends ManualPages
 					}
 		}
 
-		GL11.glTranslated(0, 0, -300);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+		GlStateManager.translate(0, 0, -300);
+		GlStateManager.disableRescaleNormal();
 		GlStateManager.enableBlend();
 		RenderHelper.disableStandardItemLighting();
 
@@ -172,7 +170,8 @@ public class ManualPageBlueprint extends ManualPages
 					for(ItemStack subStack : (ItemStack[])stack.stack)
 						if(subStack.getDisplayName().toLowerCase(Locale.ENGLISH).contains(searchTag))
 							return true;
-				} else if(stack.stack instanceof List)
+				}
+				else if(stack.stack instanceof List)
 					for(ItemStack subStack : (List<ItemStack>)stack.stack)
 					{
 						if(subStack.getDisplayName().toLowerCase(Locale.ENGLISH).contains(searchTag))
@@ -182,7 +181,8 @@ public class ManualPageBlueprint extends ManualPages
 				{
 					if(((ItemStack)stack.stack).getDisplayName().toLowerCase(Locale.ENGLISH).contains(searchTag))
 						return true;
-				} else if(stack.stack instanceof String)
+				}
+				else if(stack.stack instanceof String)
 				{
 					if(ManualUtils.isExistingOreName((String)stack.stack))
 						for(ItemStack subStack : OreDictionary.getOres((String)stack.stack))

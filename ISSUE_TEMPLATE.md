@@ -1,8 +1,5 @@
 ### Before reporting:
-If it's about the extra jar file named "ImmersiveEngineering-[version]-core":
-This is intentional. It's Forge convention to make Coremods into a seperate thing. This jar is not an unauthorized download, it is shipped with IE and automatically unpacked by Forge.
-
-Otherwise, please use the searchfuntion to make sure an issue hasn't been reported already. This avoids duplicates.
+Please use the search function to make sure an issue hasn't been reported already. This avoids duplicates.
 Also, please give this issue a descriptive name that contains the game version in the title, eg.: "[1.12] Capacitor Interaction Crash"
 
 ### Description of the issue:
@@ -19,7 +16,7 @@ If your game crashed (see above) you may omit the modlist, but IE and Forge vers
 Also, please try testing an issue in a minimal instance, with just IE, Forge and maybe JEI. That makes elminating compat issues easier.
 
 ### Lastly (you may delete this from the report itself)
-Please, for the love of all that is voxelbased, read the contribution guidelines. They are linked above in the yellow box.
+Please, for the love of all that is voxelbased, **read the contribution guidelines. They are linked to the right in the message box.**
 When reporting issues, these are crucial, and the team withholds the right to close an issue for the plain stupidity of not reading and adhering to them.
 
 Thank you for reporting issues, without people reporting them, they wouldn't get fixed. You're helping contribute to this mod and that is much appreciated <3

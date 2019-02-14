@@ -1,5 +1,259 @@
-#####Version 0.12-77
-- fixed Vertical Conveyor recipes returning too little
+#####Version 0.12-88 - BUILT
+- Changed Multiblocks to accept redstone-ignoring conveyors as well as default ones. They will revert to normal ones when the multiblock is broken. (BluSunrize)
+- Fixed crashes when opening a toolbox or a revolver GUI (Malte)
+- Fixed side solidity on conveyors, prevents snow on places it shouldn't be (BluSunrize)
+
+#####Version 0.12-87 - BUILT
+- Added a "Distribute Inputs" button to the ArcFurnace GUI. It keeps splitting the biggest stacks in the input if there is space available (BluSunrize)
+- Added the Maintenance Kit, an on-the-go option to modify tools, like changing drillheads or configuring the Ear Defenders (BluSunrize)
+- Changed the skyhook in multiple ways (Malte)
+  - The speed now depends on gravity
+  - The skyhook will not drag players into blocks any more
+  - Many other smaller changes
+- Changed connectors to accept multiple "bursts" of energy if they (in total) don't exceed the max IO rate (Malte)
+- Changed internal logic of the Assembler to be a lot more straightforward, allowing bucket-like items for fluid ingredients (BluSunrize)
+- Changed the Engineer's Workbench around (BluSunrize)
+    - Lots of internal fixes to improve reliability and performance, as well as code style
+    - Fancy new render features, showing the blueprints on the table and the ingredients being used
+- Changed Fluid Pipes to no longer automatically connect to pipes that have been dyed a different colour (BluSunrize)
+- Changed recipe for Revolver Barrel to be (hopefully) less conflicting (BluSunrize)
+- Changed Excavator to work over void (BluSunrize)
+- Removed clickable JEI areas from the Assembler because they were blocking the output slots and were unnecessary anyway (BluSunrize)
+- Fixed wires not showing particles when burning (Malte)
+- Fixed recipes for structural arms conflicting with stairs (Malte)
+- Fixed structural arms being invisible due to a conflict with CTM (Malte)
+- Fixed minor issues where certain enemy network setups made powered lanterns flicker (Malte)
+- Fixed Dragon's Breath shader using hte wrong description in the manual (BluSunrize)
+- Fixed connectors not rendering as part of manual multiblock previews (Malte)
+- Fixed Ingredient Recipe not transposing the index correctly, causing loss of items (BluSunrize)
+- Fixed Item Router voiding items when used to extract (BluSunrize)
+- Fixed an annoying consolespam with the Cartographer trades (BluSunrize)
+- Fixed various GUIs still using "RF" instead of "IF" (BluSunrize)
+- Fixed Lightningrod resulting in a crash on very specific setups (BluSunrize)
+- Fixed dupebug with ArcFurnace recycling (BluSunrize)
+- Fixed the Garden Cloche accepting Fluids it can't work with (BluSunrize)
+- Fixed connectors duping small amounts of energy (Malte)
+- Fixed lighting on capacitors (Malte)
+- Fixed excessive render latency in JEI (Malte)
+- Fixed OpenComputers integration (sargunv)
+- Fixed Covered Extracting Conveyor not applying magnet protection (BluSunrize)
+- Translations Added/Updated: ja_jp (karakufire), es_es(Dorzar & rogama25), zh_cn (mcBegins2Snow)
+
+#####Version 0.12-86 - BUILT
+- Added support for JEI ghost ingredients to the assembler and routers (Malte)
+- Re-Added razor wires hurting players trying to break them without wirecutters (Malte)
+- Re-Added coloured pipes (Malte)
+- Re-Added structural arms (Malte)
+- Added clickable areas for JEI to the IE machine GUIs (TeamSpen210)
+- Added the ability to apply Shaders to banners! (BluSunrize)
+- Added a Silt vein for the Excavator, contains clay, sand and gravel (BluSunrize)
+- Removed the additional http request for the changelog in the manual (Malte)
+- Changed Mixer to allow the use of other mods' sheetmetal in its construction (tgstyle)
+- Changed the way wire & connector models work internally (Malte)
+- Feedthrough insulators can now be formed while wires are attached to the connectors (Malte)
+- Fixed arc recycling calculations failing in rare cases (Malte)
+- Fixed lag with certain setups of routers (Malte)
+- Fixed conveyors sometimes showing the wrong model (Malte)
+- Fixed crashes with recent Forge versions (Malte)
+- Fixed the arc furnace not recycling damaged tools (BluSunrize)
+- Fixed a crash with recent Forge versions (Malte)
+- Fixed Wooden Posts connecting to Vines (BluSunrize)
+- Translations Added/Updated: ru_ru (gri3229), ko_kr (mindy15963)
+
+#####Version 0.12-85 - BUILT
+- Re-Added Thaumcraft compat (BluSunrize)
+    - Added hammering of plates for Brass, Thaumium and Void Metal 
+    - Golems can farm hemp
+    - Purifying Fluid and Liquid Death work in the Chemthrower
+    - Made the External Heater work with the Essentia Smelter
+- Added a tooltip-display to Speedloaders and Revolvers to display their currently loaded ammo (BluSunrize)
+- Re-Added the "Super Secret BluPrintz" easteregg (BluSunrize)
+- Added the ability to use the Capacitor Backpack as a Bauble (BluSunrize) 
+- Fixed up the skyhook, including one crash (Malte)
+- Fixed some rare crashes when closing a world (Malte)
+- Fixed redstone connectors not closing doors using weak signals (Malte)
+- Fixed the mixer crashing if the recipe is trying to process too much fluid (Malte)
+- Fixed Machinist selling iron and steel drills in the wrong order (BluSunrize)
+- Fixed balloon colouring on dedicated servers (Malte)
+- Fixed a dupe bug (Malte)
+- Fixed a crash involving metal ladders (Malte)
+- Fixed Crafttweaker Integration to allow removing Potion mixing recipes  (BluSunrize)
+- Fixed an edgecase crash with Cartographer Maps (BluSunrize)
+- Fixed ArcFurnace requiring additional inputs to start a recipe (BluSunrize)
+- Fixed upgrades vanishing in the Workbench (Malte)
+- Fixed Lightningrod not playing nice with other mods' energy transport (BluSunrize)
+
+#####Version 0.12-84 - BUILT
+- Changed handling of Potions in the mixer: (BluSunrize)
+    - Now supports MixPredicates as well as custom brewing recipes
+    - Shows properly in JEI, based on Potion output, rather than input
+    - Bottling recipes are consistent, anything you can mix, you can bottle (ideally)
+    - Added tooltips to Potion fluids to show which mod added the PotionType
+    - Added compat for KnightMiner's Inspirations, allowing their Splash and Lingering bottles to be filled
+- Added a separate JEI Handler for Arc-Recycling (BluSunrize)
+- Added a particle trail to Minecarts that use fancy shaders (e.g. IKELOS) (BluSunrize)
+- Added the ability to pop Balloons by hitting them with a Projectile (BluSunrize)
+- Added Shader Particles to the Railgun and Drill (BluSunrize)
+- Added a "Noise" component to the revolver, which will make it attract nearby mobs when fired (BluSunrize)
+    - Adding a bit of a stealth/survival aspect
+    - Probably not super impactful in normal singleplayer, but could be fun for pack makers
+    - This will play into a larger customization system for the Revolver, to be implemented in the future
+- Re-Added some shader textures that got lost in the 1.11 update (BluSunrize)
+- Changed Arc-Recycling to run in init and be overall cleaner (Malte)
+- Changed the recipe for Vacuum Tubes to use Nickel Plates (BluSunrize)
+- Fixed compatability with ActuallyAdditions and AttainedDrops (Shadows-of-Fire)
+- Fixed out-of-thread call to JEI functions causing crashes (BluSunrize)
+- Fixed depth-rendering issues in JEI handlers (BluSunrize)
+- Fixed shiftclicking on IE's containers (BluSunrize)
+- Translations Added/Updated: zh_cn (DYColdWind)
+
+#####Version 0.12-83 - BUILT
+- Added the Extracting Conveyor. It pulls from inventories like a Hopper (BluSunrize)
+- Added even fancier Shaders with pulsing colours and dynamic rendering. Quite open for addon devs, too! (BluSunrize)
+    - Added the IKELOS shader to make use of this
+- Added maps to the vanilla Catographer which lead to Mineral Veins (BluSunrize)
+- Added a config option to disable all use of the stencil buffer for old Intel GPUs (Malte)
+- Added normal tools (Axe, Pick, Shovel, Sword) made from Steel and Treated Wood. Good durability & efficiency, iron harvest level (BluSunrize)
+- Added a new rarity, "Masterwork". Currently only for Shaders (grabbags gained from secret advancements) but will have more use in the future! (BluSunrize)
+- Changed ItemRouters to allow pulling as well, allowing for filtered extraction (BluSunrize)
+- Changed BlastFurnace to not start using a new piece of coke if there is nothing left to smelt (Malte)
+- Changed the Excavator's Mineral Veins to consider the chunks in a radius of two around them, to avoid duplicate veins (BluSunrize)
+- Changed Chemical Thrower to factor in player-momentum to projectiles (TeamSpen210)
+- Fixed wires sometimes leaving behind the damage sources when broken (Malte)
+- Fixed the TConstruct compat module failing (Malte)
+- Fixed Hammers and Wirecutters to be properly repairable (Malte)
+- Fixed Wirecutters to be enchantable (Malte)
+- Fixed texture and model errors being spammed (Malte)
+- Fixed dropping conveyor spawning countless fake items in certain setups (Malte)
+- Fixed conveyors causing infinite loops in rare cases (Malte)
+- Fixed a crash when breaking a connector after dying (Malte)
+- Fixed wires connected to transformers breaking when they shouldn't (Malte)
+- Fixed horizotal wires on the breaker switch (Malte)
+- Fixed crashes with the Core Sample Drill in some dimensions (Malte)
+- Fixed pipes accessing the world from wrong threads (Malte)
+- Fixed a dupe bug (Malte)
+- Fixed the skyhook for vertical wires (Malte)
+- Fixed placing blocks against pipes not working as expected (Malte)
+- Fixed the garden cloche accepting any item into the fertilizer slot (Malte)
+- Fixed the workbench creating excess items (codewarrior0)
+- Fixed obstructed connections not rendering properly in LAN worlds (JamiesWhiteShirt)
+- Fixed Razor Wire not having collision on upper wall section (TeamSpen210)
+- Fixed Arc Furnace recycling being broken (BluSunrize)
+- Fixed Squeezer and Fermenter not updating the GUI when filling buckets (BluSunrize)
+- Improved log output when a compat module fails (Malte)
+- Translations Added/Updated: ja_jp (iceink001), ru_ru (kellixon ), zh_tw (vongola12324)
+
+#####Version 0.12-82 - BUILT
+- Added compat for farming Hemp to ActuallyAddition's farmer (BluSunrize)
+- Fixed Wirecutter getting consumed when cutting plates (BluSunrize)
+- Fixed Alloy Kiln consuming fuelsource container items (BluSunrize)
+- Fixed uncovered FluidPipes allowing mobspawns (BluSunrize)
+- Fixed spawn interdictors (Electric Lanterns, etc) not being removed on chunk unload (codewarrior0)
+- Fixed Metal Press animations and sounds with customized recipe times (codewarrior0)
+- Fixed some potential crashes in networking and reduced packet size (JamiesWhiteShirt)
+- Fixed 'removeRecipesForInput' in Crusher Craftweaker compat not working (BluSunrize)
+- Reduced the amount of ItemStacks being copied in rendering and recipe checking (Malte)
+- Translations Added/Updated: ja_jp (iceink001), zh_CN (DYColdWind)
+
+#####Version 0.12-81 - BUILT
+- Added the functionality for the Faraday Suit to protect against live wiring (Malte)
+- Added the ability to use Pick Block to take a connector's wire by sneaking (BluSunrize)
+- Added Magma blocks to the list of heatsources for the Thermoelectric generator (BluSunrize)
+- Added Efficiency, Unbreaking and Mending enchantments to the Engineer's Hammer and Wirecutter (BluSunrize)
+    - Made those tools take damage when used to break blocks
+- Added compatibility for Forge's update checker (Malte)
+- Added support for Forge's memory Maven repo, this makes deleting old coremod versions unnecessary in Forge 2656+ (latest) (Malte)
+- Changed fences to allow torches on top and prevent mobspawns (Malte)
+- Changed animated item models to use Item-TESRs rather than rebaking (Malte)
+    - Made the Fluorescent tube to be really fancy again! (Malte)
+- Changed renderdistance config to work as described (Malte)
+- Changed the images of wiring in the manual to use up-to-date pictures and feature connectors and relays (BluSunrize)
+- Shift-clicking is no longer needed to connect wires to breaker switches etc (Malte)
+- Failed wire connection attempts no longer spam the chat (Malte)
+- Changed Thermoelectric generator to cache its output values, improving performance (BluSunrize)
+- Fixed wires being invisible when logging into a server for the first time (Malte)
+- Fixed localization for treated wood banners (Malte)
+- Fixed the mineral command not workign with Vein names that contain a space (Malte)
+- Fixed shield having a really trippy enchantment glow (Malte)
+- Fixed conveyor recipe (Malte)
+- Fixed Skyhook crashing servers (Malte)
+- Fixed lag with redstone connectors (Malte)
+- Fixed blocks somtimes taking longer to break with the hammer (Malte)
+- Fixed a divide-by-zero issue in the ExcavatorHandler for blacklisted dimensions (BluSunrize)
+
+#####Version 0.12-80 - BUILT
+- Fixed multiblock rendering in the manual with Optifine and texture packs (Malte)
+- Fixed pre-IE-79 multiblocks not working on IE 79 (Malte)
+- Fixed FluidContainer slots not accepting empty containers (BluSunrize)
+- Fixed Villager trades for Shader bags being inverted (BluSunrize)
+- Fixed Multiblocks dropping themselves as illegal items (BluSunrize)
+- Fixed ugly high-rez textures on Engineering blocks when CTM isn't loaded (BluSunrize)
+- Translations Added/Updated: ja_jp (iceink001), zh_CN (DYColdWind)
+
+#####Version 0.12-79 - BUILT
+- Added the ability for Wirecutters to cut wires from anywhere (Malte)
+- Added Craftweaker support for the Thermolelectric Generator (BluSunrize)
+- Added documentation for metal ladders (BluSunrize)
+- Added Squeezer recipe for beetroot seeds (pap1723)
+- Re-Enabled OpenComputers compat (Malte)
+- Changed Feedthrough Connectors to break like normal multiblocks (Malte)
+- Changed Feedthrough Connectors to form regardless of connector face clicked (BluSunrize)
+- Changed codebase for wire coils to allow easier extension (AntiBlueQuirk)
+- Changed Multiblocks to only move FluidContainers to the output slots when they are full (BluSunrize)
+- Made the IE config react to changes from the in-game GUI
+- Fixed a crash with Optifine and feedthrough connectors (Malte)
+- Fixed wire rendering in edgecases (Malte)
+- Fixed issues with the Skyhook (Malte)
+- Fixed missing textures on conveyors (Malte)
+- Fixed dupebug with Jerrycans (Malte)
+- Fixed stackoverflow with routers (Malte)
+- Fixed Feedthrough Connectors functionality (Malte)
+- Fixed Coresamples not dropping when broken (Malte)
+- Fixed missing revolver sounds (BluSunrize)
+- Fixed broken audio-subtitles (lgthibault)
+- Fixed crash with windmills (lgthibault)
+- Fixed crash with metal ladders (lgthibault)
+- Fixed Craftweaker removal function of MetalPress (BluSunrize)
+- Translations Added/Updated: ja_jp (iceink001), zh_CN (DYColdWind)
+
+#####Version 0.12-78 - BUILT
+- Added a preliminary connection render to debug obstructions (Malte)
+- Added Craftweaker function to remove Crusher recipes by input (BluSurize)
+- Fixed crash when breaking middle block of Feedthrough connector (Malte)
+- Fixed errors related to floating point accuracy (Malte)
+- Fixed Blastfurnace not working at all (Malte)
+- Fixed raytracing on vertical connections (Malte)
+- Fixed Sampledrill render (Malte)
+- Fixed J8U25 message showing on dimension change (Malte)
+- Fixed Feedthrough connectors connecting to themselves (Malte)
+- Fixed wires dropping in the wrong location (Malte)
+
+#####Version 0.12-77 - BUILT
+- Various changes to the wiring system (Malte):
+  - Uninsulated energy wires cause damage now
+  - Wires don't need clear line-of-sight but a clear path along the wire as it is rendered
+  - Placing blocks that obstruct wires will cause the wire to break/drop
+  - The skyhook can attach to the middle of connections, rather than just the endpoints
+  - Added a feedthrough insulator as a way to get wires through walls
+  - Addons using wires will have to adapt to these changes!
+- IE now prints a message to chat if Java 8 update 25 is used since it causes unfixable crashes (Malte)
+- Changed Drill to have the "Shovel" tool class (primetoxinz)
+- Changed Excavator to show Cobblestone instead of missing texture when digging items instead of blocks (BluSunrize)
+- Fixed the drill not properly accepting its head (Malte)
+- Fixed broken deserialization of boolean properties, this caused some potential issues with Buildcraft (Malte)
+- Fixed some TESR blockstate crashes (Malte)
+- Fixed IE projectiles (chemthrower, railgun) not working (Malte)
+- Fixed wire loss being higher than intended in some cases (Malte)
+- Fixed fluid pipes losing fluid and not accepting small amounts (Malte)
+- Non-IE wires can no longer be connected to IE connectors (Malte)
+- Fixed arc furnace particles rendering when the arc furnace isn't active (Malte)
+- Fixed some capability crashes (Malte)
+- Fixed mobs trying to jump over IE fences (Malte)
+- Re-fixed the blast furnace using slightly more coke coal than it should (Malte)
+- Fixed Vertical Conveyor recipes returning too little (BluSunrize)
+- Fixed Nullpointer on Redstone Probes (BluSunrize)
+- Fixed Output slots not being blocked (BluSunrize)
+- Translations Added/Updated: en_ud (The-Fireplace), ja_jp (iceink001)
 
 #####Version 0.12-76 - BUILT
 - added various config options for the Belljar, to adjust growthspeeds and fertilizer effects

@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.CrusherRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -28,19 +27,19 @@ public class Crusher
 	public static void addRecipe(IItemStack output, IIngredient input, int energy, @Optional IItemStack secondaryOutput, @Optional double secondaryChance)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 		{
-			CraftTweakerAPI.getLogger().logError("Did not add crusher recipe for " + output.getDisplayName() + ", input was null");
+			CraftTweakerAPI.getLogger().logError("Did not add crusher recipe for "+output.getDisplayName()+", input was null");
 			return;
 		}
 
 		CrusherRecipe r = new CrusherRecipe(CraftTweakerHelper.toStack(output), oInput, energy);
-		if(r.input == null)
+		if(r.input==null)
 		{
-			CraftTweakerAPI.getLogger().logError("Did not add crusher recipe for " + output.getDisplayName() + ", converted input was null");
+			CraftTweakerAPI.getLogger().logError("Did not add crusher recipe for "+output.getDisplayName()+", converted input was null");
 			return;
 		}
-		if(secondaryOutput != null)
+		if(secondaryOutput!=null)
 			r.addToSecondaryOutput(CraftTweakerHelper.toStack(secondaryOutput), (float)secondaryChance);
 		CraftTweakerAPI.apply(new Add(r));
 	}
@@ -58,13 +57,12 @@ public class Crusher
 		public void apply()
 		{
 			CrusherRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Crusher Recipe for " + recipe.output.getDisplayName();
+			return "Adding Crusher Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -87,15 +85,42 @@ public class Crusher
 		@Override
 		public void apply()
 		{
-			removedRecipes = CrusherRecipe.removeRecipes(output);
-			for(CrusherRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
+			removedRecipes = CrusherRecipe.removeRecipesForOutput(output);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Crusher Recipe for " + output.getDisplayName();
+			return "Removing Crusher Recipe for output: "+output.getDisplayName();
+		}
+	}
+
+	@ZenMethod
+	public static void removeRecipesForInput(IItemStack input)
+	{
+		CraftTweakerAPI.apply(new RemoveForInput(CraftTweakerHelper.toStack(input)));
+	}
+
+	private static class RemoveForInput implements IAction
+	{
+		private final ItemStack input;
+		List<CrusherRecipe> removedRecipes;
+
+		public RemoveForInput(ItemStack input)
+		{
+			this.input = input;
+		}
+
+		@Override
+		public void apply()
+		{
+			removedRecipes = CrusherRecipe.removeRecipesForInput(input);
+		}
+
+		@Override
+		public String describe()
+		{
+			return "Removing Crusher Recipe for input: "+input.getDisplayName();
 		}
 	}
 }

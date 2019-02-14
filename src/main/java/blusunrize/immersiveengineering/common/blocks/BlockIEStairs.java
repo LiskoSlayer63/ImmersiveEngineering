@@ -27,12 +27,12 @@ public class BlockIEStairs extends BlockStairs
 	public String name;
 	float explosionResistance;
 	BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
-	
+
 	public BlockIEStairs(String name, IBlockState state)
 	{
 		super(state);
 		this.name = name;
-		this.setUnlocalizedName(ImmersiveEngineering.MODID+"."+name);
+		this.setTranslationKey(ImmersiveEngineering.MODID+"."+name);
 		this.setCreativeTab(ImmersiveEngineering.creativeTab);
 		this.useNeighborBrightness = true;
 		this.explosionResistance = this.blockResistance/5f;
@@ -40,13 +40,13 @@ public class BlockIEStairs extends BlockStairs
 		IEContent.registeredIEBlocks.add(this);
 		IEContent.registeredIEItems.add(new ItemBlockIEStairs(this));
 	}
-	
+
 	public BlockIEStairs setFlammable(boolean b)
 	{
 		this.isFlammable = b;
 		return this;
 	}
-	
+
 	public BlockIEStairs setHasFlavour(boolean hasFlavour)
 	{
 		this.hasFlavour = hasFlavour;
@@ -58,6 +58,7 @@ public class BlockIEStairs extends BlockStairs
 	{
 		return explosionResistance;
 	}
+
 	public BlockIEStairs setExplosionResistance(float explosionResistance)
 	{
 		this.explosionResistance = explosionResistance;
@@ -80,7 +81,7 @@ public class BlockIEStairs extends BlockStairs
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public BlockRenderLayer getBlockLayer()
+	public BlockRenderLayer getRenderLayer()
 	{
 		return renderLayer;
 	}

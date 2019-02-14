@@ -9,7 +9,7 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.MixerRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
+import blusunrize.immersiveengineering.common.crafting.MixerRecipePotion;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -28,7 +28,7 @@ public class Mixer
 	public static void addRecipe(ILiquidStack output, ILiquidStack fluidInput, IIngredient[] itemInputs, int energy)
 	{
 		Object[] adds = null;
-		if(itemInputs != null)
+		if(itemInputs!=null)
 		{
 			adds = new Object[itemInputs.length];
 			for(int i = 0; i < itemInputs.length; i++)
@@ -52,20 +52,19 @@ public class Mixer
 		public void apply()
 		{
 			MixerRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Fermenter Recipe for Fluid " + recipe.fluidOutput.getLocalizedName();
+			return "Adding Fermenter Recipe for Fluid "+recipe.fluidOutput.getLocalizedName();
 		}
 	}
 
 	@ZenMethod
 	public static void removeRecipe(ILiquidStack output)
 	{
-		if(CraftTweakerHelper.toFluidStack(output) != null)
+		if(CraftTweakerHelper.toFluidStack(output)!=null)
 			CraftTweakerAPI.apply(new RemoveFluid(CraftTweakerHelper.toFluidStack(output)));
 	}
 
@@ -86,19 +85,20 @@ public class Mixer
 			while(it.hasNext())
 			{
 				MixerRecipe r = it.next();
-				if(r != null && r.fluidOutput != null && r.fluidOutput.isFluidEqual(output))
+				if(r!=null&&r.fluidOutput!=null&&r.fluidOutput.isFluidEqual(output))
 				{
 					removedRecipes.add(r);
-					IECompatModule.jeiRemoveFunc.accept(r);
 					it.remove();
 				}
 			}
+			if(this.output.tag!=null&&this.output.tag.hasKey("Potion"))
+				MixerRecipePotion.BLACKLIST.add(this.output.tag.getString("Potion"));
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Mixer Recipes for Fluid " + output.getLocalizedName();
+			return "Removing Mixer Recipes for Fluid "+output.getLocalizedName();
 		}
 	}
 }

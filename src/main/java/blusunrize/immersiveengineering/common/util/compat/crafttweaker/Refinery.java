@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.RefineryRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.liquid.ILiquidStack;
@@ -50,20 +49,19 @@ public class Refinery
 		public void apply()
 		{
 			RefineryRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Refinery Recipe for " + recipe.output.getLocalizedName();
+			return "Adding Refinery Recipe for "+recipe.output.getLocalizedName();
 		}
 	}
 
 	@ZenMethod
 	public static void removeRecipe(ILiquidStack output)
 	{
-		if(CraftTweakerHelper.toFluidStack(output) != null)
+		if(CraftTweakerHelper.toFluidStack(output)!=null)
 			CraftTweakerAPI.apply(new Remove(CraftTweakerHelper.toFluidStack(output)));
 	}
 
@@ -84,10 +82,9 @@ public class Refinery
 			while(it.hasNext())
 			{
 				RefineryRecipe r = it.next();
-				if(r != null && r.output.isFluidEqual(output))
+				if(r!=null&&r.output.isFluidEqual(output))
 				{
 					removedRecipes.add(r);
-					IECompatModule.jeiRemoveFunc.accept(r);
 					it.remove();
 				}
 			}
@@ -96,7 +93,7 @@ public class Refinery
 		@Override
 		public String describe()
 		{
-			return "Removing Refinery Recipes for " + output.getLocalizedName();
+			return "Removing Refinery Recipes for "+output.getLocalizedName();
 		}
 	}
 }

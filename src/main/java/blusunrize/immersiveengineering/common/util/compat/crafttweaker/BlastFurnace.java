@@ -10,7 +10,6 @@ package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.BlastFurnaceRecipe;
 import blusunrize.immersiveengineering.api.crafting.BlastFurnaceRecipe.BlastFurnaceFuel;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -30,7 +29,7 @@ public class BlastFurnace
 	public static void addRecipe(IItemStack output, IIngredient input, int time, @Optional IItemStack slag)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 			return;
 
 		BlastFurnaceRecipe r = new BlastFurnaceRecipe(CraftTweakerHelper.toStack(output), oInput, time, CraftTweakerHelper.toStack(slag));
@@ -50,13 +49,12 @@ public class BlastFurnace
 		public void apply()
 		{
 			BlastFurnaceRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Blast Furnace Recipe for " + recipe.output.getDisplayName();
+			return "Adding Blast Furnace Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -80,14 +78,12 @@ public class BlastFurnace
 		public void apply()
 		{
 			removedRecipes = BlastFurnaceRecipe.removeRecipes(output);
-			for(BlastFurnaceRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Blast Furnace Recipe for " + output.getDisplayName();
+			return "Removing Blast Furnace Recipe for "+output.getDisplayName();
 		}
 	}
 
@@ -96,7 +92,7 @@ public class BlastFurnace
 	public static void addFuel(IIngredient input, int time)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null)
+		if(oInput==null)
 			return;
 
 		CraftTweakerAPI.apply(new AddFuel(oInput, time));
@@ -118,13 +114,12 @@ public class BlastFurnace
 		public void apply()
 		{
 			fuelRecipeKey = BlastFurnaceRecipe.addBlastFuel(fuel, burnTime);
-			IECompatModule.jeiAddFunc.accept(fuelRecipeKey);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding " + (fuel instanceof ItemStack ? ((ItemStack)fuel).getDisplayName() : (String)fuel) + " as Blast Furnace Fuel";
+			return "Adding "+(fuel instanceof ItemStack?((ItemStack)fuel).getDisplayName(): (String)fuel)+" as Blast Furnace Fuel";
 		}
 	}
 
@@ -154,7 +149,6 @@ public class BlastFurnace
 				if(e.input.matchesItemStack(stack))
 				{
 					removed = e;
-					IECompatModule.jeiRemoveFunc.accept(removed);
 					it.remove();
 					break;
 				}
@@ -164,7 +158,7 @@ public class BlastFurnace
 		@Override
 		public String describe()
 		{
-			return "Removing " + stack + " as Blast Furnace Fuel";
+			return "Removing "+stack+" as Blast Furnace Fuel";
 		}
 	}
 }

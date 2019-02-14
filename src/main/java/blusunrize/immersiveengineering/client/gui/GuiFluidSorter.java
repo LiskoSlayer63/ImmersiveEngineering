@@ -28,15 +28,15 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class GuiFluidSorter extends GuiIEContainerBase
 {
-	TileEntityFluidSorter tile;
+	public TileEntityFluidSorter tile;
 	InventoryPlayer playerInventory;
+
 	public GuiFluidSorter(InventoryPlayer inventoryPlayer, TileEntityFluidSorter tile)
 	{
 		super(new ContainerFluidSorter(inventoryPlayer, tile));
@@ -53,7 +53,7 @@ public class GuiFluidSorter extends GuiIEContainerBase
 		for(GuiButton button : this.buttonList)
 		{
 			if(button instanceof ButtonSorter)
-				if(mx>button.x&&mx<button.x+18 && my>button.y&&my<button.y+18)
+				if(mx > button.x&&mx < button.x+18&&my > button.y&&my < button.y+18)
 				{
 					int type = ((ButtonSorter)button).type;
 					String[] split = I18n.format(Lib.DESC_INFO+"filter.nbt").split("<br>");
@@ -65,9 +65,9 @@ public class GuiFluidSorter extends GuiIEContainerBase
 			for(int i = 0; i < 8; i++)
 				if(tile.filters[side][i]!=null)
 				{
-					int x = guiLeft+4+(side/2)*58 +(i<3?i*18: i>4?(i-5)*18: i==3?0: 36);
-					int y = guiTop+22+(side%2)*76 +(i<3?0: i>4?36: 18);
-					if(mx>x&&mx<x+16 && my>y&&my<y+16)
+					int x = guiLeft+4+(side/2)*58+(i < 3?i*18: i > 4?(i-5)*18: i==3?0: 36);
+					int y = guiTop+22+(side%2)*76+(i < 3?0: i > 4?36: 18);
+					if(mx > x&&mx < x+16&&my > y&&my < y+16)
 						ClientUtils.addFluidTooltip(tile.filters[side][i], tooltip, 0);
 				}
 		if(!tooltip.isEmpty())
@@ -84,18 +84,12 @@ public class GuiFluidSorter extends GuiIEContainerBase
 		for(int side = 0; side < 6; side++)
 			for(int i = 0; i < 8; i++)
 			{
-				int x = guiLeft+4+(side/2)*58 +(i<3?i*18: i>4?(i-5)*18: i==3?0: 36);
-				int y = guiTop+22+(side%2)*76 +(i<3?0: i>4?36: 18);
-				if(mouseX>x&&mouseX<x+16 && mouseY>y&&mouseY<y+16)
+				int x = guiLeft+4+(side/2)*58+(i < 3?i*18: i > 4?(i-5)*18: i==3?0: 36);
+				int y = guiTop+22+(side%2)*76+(i < 3?0: i > 4?36: 18);
+				if(mouseX > x&&mouseX < x+16&&mouseY > y&&mouseY < y+16)
 				{
 					FluidStack fs = FluidUtil.getFluidContained(playerInventory.getItemStack());
-					tile.filters[side][i] = fs;
-					NBTTagCompound tag = new NBTTagCompound();
-					tag.setInteger("filter_side", side);
-					tag.setInteger("filter_slot", i);
-					if(fs!=null)
-						tag.setTag("filter", fs.writeToNBT(new NBTTagCompound()));
-					ImmersiveEngineering.packetHandler.sendToServer(new MessageTileSync(tile, tag));
+					setFluidInSlot(side, i, fs);
 				}
 			}
 	}
@@ -103,29 +97,29 @@ public class GuiFluidSorter extends GuiIEContainerBase
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int mx, int my)
 	{
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		ClientUtils.bindTexture("immersiveengineering:textures/gui/sorter.png");
-		this.drawTexturedModalRect(guiLeft,guiTop, 0, 0, xSize, ySize);
-		for(int side=0; side<6; side++)
+		this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+		for(int side = 0; side < 6; side++)
 		{
 			ClientUtils.bindAtlas();
-			for(int i=0; i<8; i++)
+			for(int i = 0; i < 8; i++)
 				if(tile.filters[side][i]!=null)
 				{
 					TextureAtlasSprite sprite = ClientUtils.getSprite(tile.filters[side][i].getFluid().getStill(tile.filters[side][i]));
 					if(sprite!=null)
 					{
-						int x = guiLeft+4+(side/2)*58 +(i<3?i*18: i>4?(i-5)*18: i==3?0: 36);
-						int y = guiTop+22+(side%2)*76 +(i<3?0: i>4?36: 18);
+						int x = guiLeft+4+(side/2)*58+(i < 3?i*18: i > 4?(i-5)*18: i==3?0: 36);
+						int y = guiTop+22+(side%2)*76+(i < 3?0: i > 4?36: 18);
 						int col = tile.filters[side][i].getFluid().getColor(tile.filters[side][i]);
-						GlStateManager.color((col>>16&255)/255.0f, (col>>8&255)/255.0f, (col&255)/255.0f, 1);
-						ClientUtils.drawTexturedRect(x,y, 16,16, sprite.getMinU(),sprite.getMaxU(),sprite.getMinV(),sprite.getMaxV());
+						GlStateManager.color((col >> 16&255)/255.0f, (col >> 8&255)/255.0f, (col&255)/255.0f, 1);
+						ClientUtils.drawTexturedRect(x, y, 16, 16, sprite.getMinU(), sprite.getMaxU(), sprite.getMinV(), sprite.getMaxV());
 					}
 				}
 			int x = guiLeft+30+(side/2)*58;
 			int y = guiTop+44+(side%2)*76;
-			String s = I18n.format("desc.immersiveengineering.info.blockSide."+EnumFacing.getFront(side).toString()).substring(0, 1);
-			GL11.glEnable(3042);
+			String s = I18n.format("desc.immersiveengineering.info.blockSide."+EnumFacing.byIndex(side).toString()).substring(0, 1);
+			GlStateManager.enableBlend();
 			ClientUtils.font().drawString(s, x-(ClientUtils.font().getStringWidth(s)/2), y, 0xaacccccc, true);
 		}
 		ClientUtils.bindTexture("immersiveengineering:textures/gui/sorter.png");
@@ -136,28 +130,39 @@ public class GuiFluidSorter extends GuiIEContainerBase
 	{
 		super.initGui();
 		this.buttonList.clear();
-		for(int side=0; side<6; side++)
-			{
-				int x = guiLeft+21+ (side/2)*58;
-				int y = guiTop+3+ (side%2)*76;
-				ButtonSorter b = new ButtonSorter(side, x,y, 1);
-				b.active = this.tile.doNBT(side);
-				this.buttonList.add(b);
-			}
+		for(int side = 0; side < 6; side++)
+		{
+			int x = guiLeft+21+(side/2)*58;
+			int y = guiTop+3+(side%2)*76;
+			ButtonSorter b = new ButtonSorter(side, x, y, 1);
+			b.active = this.tile.doNBT(side);
+			this.buttonList.add(b);
+		}
 	}
 
 	@Override
 	protected void actionPerformed(GuiButton button)
 	{
-		if(button instanceof ButtonSorter && FMLCommonHandler.instance().getEffectiveSide()==Side.CLIENT)
+		if(button instanceof ButtonSorter&&FMLCommonHandler.instance().getEffectiveSide()==Side.CLIENT)
 		{
 			int side = button.id;
-			this.tile.sortWithNBT[side] = (byte)(this.tile.sortWithNBT[side]==1?0:1);
+			this.tile.sortWithNBT[side] = (byte)(this.tile.sortWithNBT[side]==1?0: 1);
 
 			NBTTagCompound tag = new NBTTagCompound();
 			tag.setByteArray("sideConfig", this.tile.sortWithNBT);
 			ImmersiveEngineering.packetHandler.sendToServer(new MessageTileSync(tile, tag));
 			this.initGui();
 		}
+	}
+
+	public void setFluidInSlot(int side, int slot, FluidStack fluid)
+	{
+		tile.filters[side][slot] = fluid;
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setInteger("filter_side", side);
+		tag.setInteger("filter_slot", slot);
+		if(fluid!=null)
+			tag.setTag("filter", fluid.writeToNBT(new NBTTagCompound()));
+		ImmersiveEngineering.packetHandler.sendToServer(new MessageTileSync(tile, tag));
 	}
 }

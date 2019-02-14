@@ -9,7 +9,6 @@
 package blusunrize.immersiveengineering.common.util.compat.crafttweaker;
 
 import blusunrize.immersiveengineering.api.crafting.BottlingMachineRecipe;
-import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.IAction;
 import crafttweaker.api.item.IIngredient;
@@ -28,7 +27,7 @@ public class BottlingMachine
 	public static void addRecipe(IItemStack output, IIngredient input, ILiquidStack fluid)
 	{
 		Object oInput = CraftTweakerHelper.toObject(input);
-		if(oInput == null || output == null || fluid == null)
+		if(oInput==null||output==null||fluid==null)
 			return;
 
 		BottlingMachineRecipe r = new BottlingMachineRecipe(CraftTweakerHelper.toStack(output), oInput, CraftTweakerHelper.toFluidStack(fluid));
@@ -48,13 +47,12 @@ public class BottlingMachine
 		public void apply()
 		{
 			BottlingMachineRecipe.recipeList.add(recipe);
-			IECompatModule.jeiAddFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Adding Bottling Machine Recipe for " + recipe.output.getDisplayName();
+			return "Adding Bottling Machine Recipe for "+recipe.output.getDisplayName();
 		}
 	}
 
@@ -78,14 +76,12 @@ public class BottlingMachine
 		public void apply()
 		{
 			removedRecipes = BottlingMachineRecipe.removeRecipes(output);
-			for(BottlingMachineRecipe recipe : removedRecipes)
-				IECompatModule.jeiRemoveFunc.accept(recipe);
 		}
 
 		@Override
 		public String describe()
 		{
-			return "Removing Bottling Machine Recipe for " + output.getDisplayName();
+			return "Removing Bottling Machine Recipe for "+output.getDisplayName();
 		}
 	}
 }

@@ -20,7 +20,9 @@ import java.util.Map;
 public class NameRemapper
 {
 	private static final Map<String, String> nameMap = new HashMap<>();
-	static{
+
+	static
+	{
 		nameMap.put("woodendecoration", "wooden_decoration");
 		nameMap.put("storageslab", "storage_slab");
 		nameMap.put("stonedecorationstairs_concrete_leaded", "stone_decoration_stairs_concrete_leaded");
@@ -67,7 +69,7 @@ public class NameRemapper
 	{
 		for(MissingMappings.Mapping miss : ev.getMappings())
 		{
-			String newName = nameMap.get(miss.key.getResourcePath());
+			String newName = nameMap.get(miss.key.getPath());
 			if(newName!=null)
 			{
 				ResourceLocation newLoc = new ResourceLocation(ImmersiveEngineering.MODID, newName);
@@ -81,7 +83,8 @@ public class NameRemapper
 				else
 					miss.warn();
 
-			} else
+			}
+			else
 			{
 				IELogger.error("Couldn't remap "+miss.key);
 			}

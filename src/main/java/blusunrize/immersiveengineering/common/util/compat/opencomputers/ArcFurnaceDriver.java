@@ -12,7 +12,6 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.api.network.Node;
 import li.cil.oc.api.prefab.DriverSidedTileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -31,9 +30,9 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 		TileEntity te = w.getTileEntity(bp);
 		if(te instanceof TileEntityArcFurnace)
 		{
-			TileEntityArcFurnace arc = (TileEntityArcFurnace) te;
+			TileEntityArcFurnace arc = (TileEntityArcFurnace)te;
 			TileEntityArcFurnace master = arc.master();
-			if(master != null && arc.isRedstonePos())
+			if(master!=null&&arc.isRedstonePos())
 				return new ArcFurnaceEnvironment(w, master.getPos(), TileEntityArcFurnace.class);
 		}
 		return null;
@@ -45,7 +44,7 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 		return TileEntityArcFurnace.class;
 	}
 
-	public class ArcFurnaceEnvironment extends ManagedEnvironmentIE<TileEntityArcFurnace>
+	public class ArcFurnaceEnvironment extends ManagedEnvironmentIE.ManagedEnvMultiblock<TileEntityArcFurnace>
 	{
 
 		@Override
@@ -65,25 +64,6 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 			super(w, p, teClass);
 		}
 
-		@Override
-		public void onConnect(Node node)
-		{
-			TileEntityArcFurnace master = getTileEntity();
-			if(master != null)
-			{
-				master.controllingComputers++;
-				master.computerOn = true;
-			}
-		}
-
-		@Override
-		public void onDisconnect(Node node)
-		{
-			TileEntityArcFurnace te = getTileEntity();
-			if(te != null)
-				te.controllingComputers--;
-		}
-
 		@Callback(doc = "function():int -- gets the maximum amount of energy stored")
 		public Object[] getMaxEnergyStored(Context context, Arguments args)
 		{
@@ -96,13 +76,6 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 			return new Object[]{getTileEntity().energyStorage.getEnergyStored()};
 		}
 
-		@Callback(doc = "function(on:boolean) -- turns the excavator on or off")
-		public Object[] setEnabled(Context context, Arguments args)
-		{
-			getTileEntity().computerOn = args.checkBoolean(0);
-			return null;
-		}
-
 		@Callback(doc = "function():boolean -- checks whether the arc furnace is currently active")
 		public Object[] isActive(Context context, Arguments args)
 		{
@@ -113,14 +86,14 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 		public Object[] getInputStack(Context context, Arguments args)
 		{
 			int slot = args.checkInteger(0);
-			if(slot < 1 || slot > 12)
+			if(slot < 1||slot > 12)
 				throw new IllegalArgumentException("Input slots are 1-12");
 			TileEntityArcFurnace master = getTileEntity();
-			Map<String, Object> stack = Utils.saveStack(master.inventory.get(slot - 1));
+			Map<String, Object> stack = Utils.saveStack(master.inventory.get(slot-1));
 			mainLoop:
 			for(MultiblockProcess<ArcFurnaceRecipe> p : master.processQueue)
-				for(int i : ((MultiblockProcessInMachine<ArcFurnaceRecipe>) p).getInputSlots())
-					if(i == slot - 1)
+				for(int i : ((MultiblockProcessInMachine<ArcFurnaceRecipe>)p).getInputSlots())
+					if(i==slot-1)
 					{
 						stack.put("progress", p.processTick);
 						stack.put("maxProgress", p.maxTicks);
@@ -138,18 +111,18 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 		public Object[] getOutputStack(Context context, Arguments args)
 		{
 			int slot = args.checkInteger(0);
-			if(slot < 1 || slot > 6)
+			if(slot < 1||slot > 6)
 				throw new IllegalArgumentException("Output slots are 1-6");
-			return new Object[]{getTileEntity().inventory.get(slot + 15)};
+			return new Object[]{getTileEntity().inventory.get(slot+15)};
 		}
 
 		@Callback(doc = "function(stack:int):table -- returns the specified additive stack")
 		public Object[] getAdditiveStack(Context context, Arguments args)
 		{
 			int slot = args.checkInteger(0);
-			if(slot < 1 || slot > 4)
+			if(slot < 1||slot > 4)
 				throw new IllegalArgumentException("Additive slots are 1-4");
-			return new Object[]{getTileEntity().inventory.get(slot + 11)};
+			return new Object[]{getTileEntity().inventory.get(slot+11)};
 		}
 
 		@Callback(doc = "function():table -- returns the slag stack")
@@ -169,13 +142,28 @@ public class ArcFurnaceDriver extends DriverSidedTileEntity
 		public Object[] getElectrode(Context context, Arguments args)
 		{
 			int slot = args.checkInteger(0);
-			if(slot < 1 || slot > 3)
+			if(slot < 1||slot > 3)
 				throw new IllegalArgumentException("Electrode slots are 1-3");
-			ItemStack stack = getTileEntity().inventory.get(slot + 22);
+			ItemStack stack = getTileEntity().inventory.get(slot+22);
 			Map<String, Object> map = Utils.saveStack(stack);
-			if(!stack.isEmpty() && stack.getItem() instanceof ItemGraphiteElectrode)
+			if(!stack.isEmpty()&&stack.getItem() instanceof ItemGraphiteElectrode)
 				map.put("damage", ItemNBTHelper.getInt(stack, "graphDmg"));
 			return new Object[]{map};
 		}
+
+		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables computer control for the attached machine")
+		public Object[] enableComputerControl(Context context, Arguments args)
+		{
+			return super.enableComputerControl(context, args);
+		}
+
+		@Override
+		@Callback(doc = "function(enabled:bool):nil -- Enables or disables the machine. Call \"enableComputerControl(true)\" before using this and disable computer control before removing the computer")
+		public Object[] setEnabled(Context context, Arguments args)
+		{
+			return super.setEnabled(context, args);
+		}
 	}
+
 }

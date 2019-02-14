@@ -36,14 +36,16 @@ public enum BlockTypes_Connector implements IStringSerializable, BlockIEBase.IBl
 	{
 		return this.toString().toLowerCase(Locale.ENGLISH);
 	}
+
 	@Override
 	public int getMeta()
 	{
 		return ordinal();
 	}
+
 	@Override
 	public boolean listForCreative()
 	{
-		return true;
+		return this!=FEEDTHROUGH;
 	}
 }

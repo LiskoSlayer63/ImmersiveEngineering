@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * @author BluSunrize - 20.02.2016
- *
+ * <p>
  * The recipe for the Squeezer
  */
 public class MixerRecipe extends MultiblockRecipe
@@ -35,24 +35,26 @@ public class MixerRecipe extends MultiblockRecipe
 	public final FluidStack fluidInput;
 	public final FluidStack fluidOutput;
 	public final int fluidAmount;
+
 	public MixerRecipe(FluidStack fluidOutput, FluidStack fluidInput, Object[] itemInputs, int energy)
 	{
 		this.fluidOutput = fluidOutput;
 		this.fluidAmount = fluidOutput.amount;
 		this.fluidInput = fluidInput;
-		this.itemInputs = new IngredientStack[itemInputs==null?0:itemInputs.length];
+		this.itemInputs = new IngredientStack[itemInputs==null?0: itemInputs.length];
 		if(itemInputs!=null)
-			for(int i=0; i<itemInputs.length; i++)
+			for(int i = 0; i < itemInputs.length; i++)
 				this.itemInputs[i] = ApiUtils.createIngredientStack(itemInputs[i]);
 		this.totalProcessEnergy = (int)Math.floor(energy*energyModifier);
 		this.totalProcessTime = (int)Math.floor(fluidOutput.amount*timeModifier);
 
-		this.fluidInputList  = Lists.newArrayList(this.fluidInput);
+		this.fluidInputList = Lists.newArrayList(this.fluidInput);
 		this.inputList = Lists.newArrayList(this.itemInputs);
 		this.fluidOutputList = Lists.newArrayList(this.fluidOutput);
 	}
 
 	public static ArrayList<MixerRecipe> recipeList = new ArrayList();
+
 	public static MixerRecipe addRecipe(FluidStack fluidOutput, FluidStack fluidInput, Object[] itemInput, int energy)
 	{
 		MixerRecipe r = new MixerRecipe(fluidOutput, fluidInput, itemInput, energy);
@@ -77,15 +79,19 @@ public class MixerRecipe extends MultiblockRecipe
 
 	public boolean matches(FluidStack fluid, NonNullList<ItemStack> components)
 	{
-		if(fluid!=null && fluid.containsFluid(this.fluidInput))
-		{
+		return compareToInputs(fluid, components, this.fluidInput, this.itemInputs);
+	}
 
+	protected boolean compareToInputs(FluidStack fluid, NonNullList<ItemStack> components, FluidStack fluidInput, IngredientStack[] itemInputs)
+	{
+		if(fluid!=null&&fluid.containsFluid(fluidInput))
+		{
 			ArrayList<ItemStack> queryList = new ArrayList<ItemStack>(components.size());
 			for(ItemStack s : components)
 				if(!s.isEmpty())
 					queryList.add(s.copy());
 
-			for(IngredientStack add : this.itemInputs)
+			for(IngredientStack add : itemInputs)
 				if(add!=null)
 				{
 					int addAmount = add.inputSize;
@@ -99,7 +105,7 @@ public class MixerRecipe extends MultiblockRecipe
 								if(query.getCount() > addAmount)
 								{
 									query.shrink(addAmount);
-									addAmount=0;
+									addAmount = 0;
 								}
 								else
 								{
@@ -108,11 +114,11 @@ public class MixerRecipe extends MultiblockRecipe
 								}
 							if(query.getCount() <= 0)
 								it.remove();
-							if(addAmount<=0)
+							if(addAmount <= 0)
 								break;
 						}
 					}
-					if(addAmount>0)
+					if(addAmount > 0)
 						return false;
 				}
 			return true;
@@ -120,14 +126,15 @@ public class MixerRecipe extends MultiblockRecipe
 		return false;
 	}
 
+
 	public int[] getUsedSlots(FluidStack input, NonNullList<ItemStack> components)
 	{
 		Set<Integer> usedSlotSet = new HashSet<Integer>();
-		for(int i=0; i<itemInputs.length; i++)
+		for(int i = 0; i < itemInputs.length; i++)
 		{
 			IngredientStack ingr = itemInputs[i];
-			for(int j=0; j<components.size(); j++)
-				if(!usedSlotSet.contains(j) && !components.get(j).isEmpty() && ingr.matchesItemStack(components.get(j)))
+			for(int j = 0; j < components.size(); j++)
+				if(!usedSlotSet.contains(j)&&!components.get(j).isEmpty()&&ingr.matchesItemStack(components.get(j)))
 				{
 					usedSlotSet.add(j);
 					break;
@@ -150,7 +157,7 @@ public class MixerRecipe extends MultiblockRecipe
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt)
 	{
 		nbt.setTag("fluidInput", fluidInput.writeToNBT(new NBTTagCompound()));
-		if(this.itemInputs.length>0)
+		if(this.itemInputs.length > 0)
 		{
 			NBTTagList list = new NBTTagList();
 			for(IngredientStack add : this.itemInputs)
@@ -159,6 +166,7 @@ public class MixerRecipe extends MultiblockRecipe
 		}
 		return nbt;
 	}
+
 	public static MixerRecipe loadFromNBT(NBTTagCompound nbt)
 	{
 		FluidStack fluidInput = FluidStack.loadFluidStackFromNBT(nbt.getCompoundTag("fluidInput"));
@@ -167,21 +175,21 @@ public class MixerRecipe extends MultiblockRecipe
 		{
 			NBTTagList list = nbt.getTagList("itemInputs", 10);
 			itemInputs = new IngredientStack[list.tagCount()];
-			for(int i=0; i<itemInputs.length; i++)
+			for(int i = 0; i < itemInputs.length; i++)
 				itemInputs[i] = IngredientStack.readFromNBT(list.getCompoundTagAt(i));
 		}
 		for(MixerRecipe recipe : recipeList)
 			if(recipe.fluidInput.equals(fluidInput))
 			{
-				if(itemInputs==null && recipe.itemInputs.length<1)
+				if(itemInputs==null&&recipe.itemInputs.length < 1)
 					return recipe;
-				else if(itemInputs!=null && recipe.itemInputs.length==itemInputs.length)
+				else if(itemInputs!=null&&recipe.itemInputs.length==itemInputs.length)
 				{
 					boolean b = true;
-					for(int i=0; i<itemInputs.length; i++)
+					for(int i = 0; i < itemInputs.length; i++)
 						if(!itemInputs[i].equals(recipe.itemInputs[i]))
 						{
-							b=false;
+							b = false;
 							break;
 						}
 					if(b)
@@ -189,5 +197,11 @@ public class MixerRecipe extends MultiblockRecipe
 				}
 			}
 		return null;
+	}
+
+	@Override
+	public boolean shouldCheckItemAvailability()
+	{
+		return false;
 	}
 }

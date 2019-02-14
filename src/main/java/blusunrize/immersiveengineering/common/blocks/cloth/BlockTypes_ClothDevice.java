@@ -17,18 +17,21 @@ public enum BlockTypes_ClothDevice implements IStringSerializable, BlockIEBase.I
 {
 	CUSHION,
 	BALLOON,
-	STRIPCURTAIN;
+	STRIPCURTAIN,
+	SHADER_BANNER;
 
 	@Override
 	public String getName()
 	{
 		return this.toString().toLowerCase(Locale.ENGLISH);
 	}
+
 	@Override
 	public int getMeta()
 	{
 		return ordinal();
 	}
+
 	@Override
 	public boolean listForCreative()
 	{

@@ -9,6 +9,8 @@
 package blusunrize.immersiveengineering.common.util.compat.jei.blastfurnace;
 
 import blusunrize.immersiveengineering.api.crafting.BlastFurnaceRecipe.BlastFurnaceFuel;
+import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDevices;
 import blusunrize.immersiveengineering.common.util.compat.jei.IERecipeCategory;
 import blusunrize.immersiveengineering.common.util.compat.jei.JEIHelper;
 import mezz.jei.api.IGuiHelper;
@@ -29,7 +31,7 @@ public class BlastFurnaceFuelCategory extends IERecipeCategory<BlastFurnaceFuel,
 
 	public BlastFurnaceFuelCategory(IGuiHelper helper)
 	{
-		super("blastfurnace.fuel","gui.immersiveengineering.blastFurnace.fuel", helper.createDrawable(background, 55, 38, 18, 32, 0, 0, 0, 80), BlastFurnaceFuel.class);
+		super("blastfurnace.fuel", "gui.immersiveengineering.blastFurnace.fuel", helper.createDrawable(background, 55, 38, 18, 32, 0, 0, 0, 80), BlastFurnaceFuel.class, new ItemStack(IEContent.blockStoneDevice, 1, BlockTypes_StoneDevices.BLAST_FURNACE.getMeta()), new ItemStack(IEContent.blockStoneDevice, 1, BlockTypes_StoneDevices.BLAST_FURNACE_ADVANCED.getMeta()));
 
 		flame = helper.createDrawable(BlastFurnaceRecipeCategory.background, 176, 0, 14, 14);
 	}
@@ -58,7 +60,7 @@ public class BlastFurnaceFuelCategory extends IERecipeCategory<BlastFurnaceFuel,
 	@Override
 	public IRecipeWrapper getRecipeWrapper(BlastFurnaceFuel recipe)
 	{
-		if(recipe!=null && recipe.input!=null)
+		if(recipe!=null&&recipe.input!=null)
 			return new BlastFurnaceFuelWrapper(JEIHelper.jeiHelpers.getGuiHelper(), recipe.input.getStackList(), recipe.burnTime);
 		return null;
 	}

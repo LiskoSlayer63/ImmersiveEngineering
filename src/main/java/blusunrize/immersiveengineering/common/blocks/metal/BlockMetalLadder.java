@@ -10,6 +10,7 @@ package blusunrize.immersiveengineering.common.blocks.metal;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.common.blocks.BlockIEBase.IELadderBlock;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.ItemBlockIEBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -103,11 +104,11 @@ public class BlockMetalLadder extends IELadderBlock<BlockTypes_MetalLadder>
 	{
 		if(this.getMetaFromState(state)==0)
 		{
-			TileEntityLadder tile = (TileEntityLadder)world.getTileEntity(pos);
-			if(tile!=null)
+			TileEntity tileEntity = world.getTileEntity(pos);
+			if(tileEntity instanceof IEBlockInterfaces.IDirectionalTile)
 			{
-				EnumFacing dir = tile.getFacing();
-				return LADDER_AABB[dir.getIndex()-2];
+				IEBlockInterfaces.IDirectionalTile directionalTile = (IEBlockInterfaces.IDirectionalTile)tileEntity;
+				return LADDER_AABB[directionalTile.getFacing().getIndex()-2];
 			}
 		}
 		return super.getBoundingBox(state, world, pos);
@@ -139,10 +140,11 @@ public class BlockMetalLadder extends IELadderBlock<BlockTypes_MetalLadder>
 	@Override
 	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos)
 	{
-		TileEntityLadder tile = (TileEntityLadder)world.getTileEntity(pos);
-		if(tile!=null)
+		TileEntity te = world.getTileEntity(pos);
+		if(te instanceof TileEntityLadder)
 		{
-			EnumFacing enumfacing = tile.getFacing();
+			TileEntityLadder ladder = (TileEntityLadder)te;
+			EnumFacing enumfacing = ladder.getFacing();
 			if(getMetaFromState(state)==0&&!this.canAttachTo(world, pos.offset(enumfacing.getOpposite()), enumfacing))
 			{
 				this.dropBlockAsItem(world, pos, state, 0);
@@ -165,7 +167,7 @@ public class BlockMetalLadder extends IELadderBlock<BlockTypes_MetalLadder>
 	{
 		state = super.getActualState(state, world, pos);
 		TileEntityLadder tile = (TileEntityLadder)world.getTileEntity(pos);
-		if(tile!=null && tile.getFacing().getAxis().isHorizontal())
+		if(tile!=null&&tile.getFacing().getAxis().isHorizontal())
 			state = applyProperty(state, IEProperties.FACING_HORIZONTAL, tile.getFacing());
 		return state;
 	}
