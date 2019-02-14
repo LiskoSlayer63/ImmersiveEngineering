@@ -94,9 +94,9 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 						handler.drain(out, true);
 					} else if (world.getTotalWorldTime() % 20 == ((getPos().getX() ^ getPos().getZ()) & 19) && world.getBlockState(getPos().offset(f)).getMaterial().isLiquid() && Utils.getRelatedFluid(world, getPos().offset(f)) != null && tank.fill(new FluidStack(Utils.getRelatedFluid(world, getPos().offset(f)), 1000), false) == 1000 
 							&& 
-							((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(getPos().offset(f)).getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+							((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(Utils.getRelatedFluid(world, getPos().offset(f)).getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
 							||
-							(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(getPos().offset(f)).getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+							(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(Utils.getRelatedFluid(world, getPos().offset(f)).getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
 							&& 
 							this.energyStorage.extractEnergy(IEConfig.Machines.pump_consumption, true) >= IEConfig.Machines.pump_consumption)
 					{
@@ -136,7 +136,7 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 						//						if(rainbow>9)
 						//							rainbow++;
 						//						world.setBlock( cc.posX,cc.posY,cc.posZ, Blocks.stained_glass,rainbow, 0x3);
-						if(IEConfig.Machines.pump_placeCobble&&placeCobble)
+						if(IEConfig.Machines.pump_placeCobble && placeCobble)
 							world.setBlockState(pos, Blocks.COBBLESTONE.getDefaultState());
 						this.tank.fill(fs, true);
 						closedList.remove(target);
@@ -174,11 +174,12 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 			if(!checked.contains(next))
 			{
 				Fluid fluid = Utils.getRelatedFluid(world, next);
+				
 				if(fluid!=null 
 						&& 
-						!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(next).getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+						!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
 						||
-						(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(next).getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+						(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
 						&& 
 						(searchFluid==null || fluid==searchFluid))
 				{
@@ -193,9 +194,9 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 						fluid = Utils.getRelatedFluid(world, pos2);
 						if(!checked.contains(pos2) && !closedList.contains(pos2) && !openList.contains(pos2) && fluid!=null 
 								&& 
-								!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(pos2).getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+								!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
 								||
-								(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(world.getBlockState(pos2).getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+								(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
 								&& 
 								(searchFluid==null || fluid==searchFluid))
 							openList.add(pos2);
