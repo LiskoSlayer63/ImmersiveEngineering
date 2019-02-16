@@ -153,7 +153,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
-@SuppressWarnings("deprecation")
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy
 {
@@ -163,8 +162,8 @@ public class ClientProxy extends CommonProxy
 	public static IENixieFontRender nixieFont;
 	public static IEItemFontRender itemFont;
 	public static boolean stencilBufferEnabled = false;
-	public static KeyBinding keybind_magnetEquip = new KeyBinding("key.immersiveengineering.magnetEquip", Keyboard.KEY_S, "key.categories.gameplay");
-	public static KeyBinding keybind_chemthrowerSwitch = new KeyBinding("key.immersiveengineering.chemthrowerSwitch", 0, "key.categories.gameplay");
+	public static KeyBinding keybind_magnetEquip = new KeyBinding("key.immersiveengineering.magnetEquip", Keyboard.KEY_NONE, "key.categories.gameplay");
+	public static KeyBinding keybind_chemthrowerSwitch = new KeyBinding("key.immersiveengineering.chemthrowerSwitch", Keyboard.KEY_NONE, "key.categories.gameplay");
 
 	@Override
 	public void preInit()
