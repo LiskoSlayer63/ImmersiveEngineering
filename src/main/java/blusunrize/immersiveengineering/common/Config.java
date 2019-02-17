@@ -63,15 +63,15 @@ public class Config
 		public static boolean validateConnections = false;
 		@Comment({"The transfer rates in Flux/t for the wire tiers (copper, electrum, HV, Structural Rope, Cable & Redstone(no transfer) )"})
 		@Mapped(mapClass = Config.class, mapName = "manual_intA")
-		public static int[] wireTransferRate = new int[]{2048, 8192, 32768, 0, 0, 0};
+		public static int[] wireTransferRate = new int[]{4096, 16384, 65536, 0, 0, 0};
 		@Comment({"The percentage of power lost every 16 blocks of distance for the wire tiers (copper, electrum, HV, Structural Rope, Cable & Redstone(no transfer) )"})
-		public static double[] wireLossRatio = new double[]{.05, .025, .025, 1, 1, 1};
+		public static double[] wireLossRatio = new double[]{0, 0, 0, 1, 1, 1};
 
 		public static int[] wireColourationDefault = new int[]{0xb36c3f, 0xeda045, 0x6f6f6f, 0x967e6d, 0x6f6f6f, 0xff2f2f, 0xfaf1de, 0x9d857a};
 		@Comment({"The RGB colourate of the wires."})
 		public static int[] wireColouration = wireColourationDefault;
 		@Comment({"The maximum length wire can have. Copper and Electrum should be similar, Steel is meant for long range transport, Structural Rope & Cables are purely decorational"})
-		public static int[] wireLength = new int[]{16, 16, 32, 32, 32, 32};
+		public static int[] wireLength = new int[]{32, 32, 32, 32, 32, 32};
 		@Comment({"If this is enabled, wires connected to power sources will cause damage to entities touching them",
 				"This shouldn't cause significant lag but possibly will. If it does, please report it at https://github.com/BluSunrize/ImmersiveEngineering/issues unless there is a report of it already."})
 		public static boolean enableWireDamage = true;
@@ -133,35 +133,35 @@ public class Config
 			//Connectors
 			@Comment({"In- and output rates of LV,MV and HV Wire Conenctors. This is independant of the transferrate of the wires."})
 			@Mapped(mapClass = Config.class, mapName = "manual_intA")
-			public static int[] wireConnectorInput = new int[]{256, 1024, 4096};
+			public static int[] wireConnectorInput = new int[]{512, 2048, 8192};
 			//Capacitors
 			@Comment({"The maximum amount of Flux that can be stored in a low-voltage capacitor"})
 			@RangeInt(min = 1)
-			public static int capacitorLV_storage = 100000;
+			public static int capacitorLV_storage = 200000;
 			@Comment({"The maximum amount of Flux that can be input into a low-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorLV_input = 256;
+			public static int capacitorLV_input = 512;
 			@Comment({"The maximum amount of Flux that can be output from a low-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorLV_output = 256;
+			public static int capacitorLV_output = 512;
 			@Comment({"The maximum amount of Flux that can be stored in a medium-voltage capacitor"})
 			@RangeInt(min = 1)
-			public static int capacitorMV_storage = 1000000;
+			public static int capacitorMV_storage = 2000000;
 			@Comment({"The maximum amount of Flux that can be input into a medium-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorMV_input = 1024;
+			public static int capacitorMV_input = 2048;
 			@Comment({"The maximum amount of Flux that can be output from a medium-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorMV_output = 1024;
+			public static int capacitorMV_output = 2048;
 			@Comment({"The maximum amount of Flux that can be stored in a high-voltage capacitor"})
 			@RangeInt(min = 1)
-			public static int capacitorHV_storage = 4000000;
+			public static int capacitorHV_storage = 8000000;
 			@Comment({"The maximum amount of Flux that can be input into a high-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorHV_input = 4096;
+			public static int capacitorHV_input = 8192;
 			@Comment({"The maximum amount of Flux that can be output from a high-voltage capacitor (by IE net or other means)"})
 			@RangeInt(min = 1)
-			public static int capacitorHV_output = 4096;
+			public static int capacitorHV_output = 8192;
 
 			//Generators
 			@Comment({"The base Flux that is output by the dynamo. This will be modified by the rotation modifier of the attached water- or windmill"})
@@ -176,7 +176,7 @@ public class Config
 			@Comment({"The Flux per tick that the Diesel Generator will output. The burn time of the fuel determines the total output"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
 			@RangeInt(min = 0)
-			public static int dieselGen_output = 4096;
+			public static int dieselGen_output = 8192;
 
 			//Simple Machines
 			@Comment({"The Flux per tick consumed to add one heat to a furnace. Creates up to 4 heat in the startup time and then 1 heat per tick to keep it running"})
@@ -207,7 +207,7 @@ public class Config
 			public static int pump_consumption_accelerate = 5;
 			@Comment({"Set the fluid sources that should be infinite when pumping\nIf pump_blacklistMode is true, this acts like a blacklist"})
 			@Mapped(mapClass = Config.class, mapName = "manual_stringA")
-			public static String[] pump_infiniteFluids = new String[]{ "minecraft:water" };
+			public static String[] pump_infiniteFluids = new String[]{ "minecraft:water", "minecraft:lava", "biomesoplenty:hot_spring_water", "biomesoplenty:blood", "biomesoplenty:poison", "biomesoplenty:sand" };
 			@Comment({"Setting this to true inverts the infiniteFluids list to act like a blacklist instead of whitelist"})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			public static boolean pump_blacklistMode = false;
@@ -319,7 +319,7 @@ public class Config
 			public static float arcFurnace_timeModifier = 1;
 			@Comment({"The maximum amount of damage Graphite Electrodes can take. While the furnace is working, electrodes sustain 1 damage per tick, so this is effectively the lifetime in ticks. The default value of 96000 makes them last for 8 consecutive ingame days"})
 			@RangeInt(min = 1)
-			public static int arcfurnace_electrodeDamage = 96000;
+			public static int arcfurnace_electrodeDamage = 960000;
 			@Comment({"Set this to true to make the blueprint for graphite electrodes craftable in addition to villager/dungeon loot"})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			@RequiresMcRestart
@@ -355,7 +355,7 @@ public class Config
 			@Comment({"The Flux per tick the Excavator will consume to dig"})
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
 			@RangeInt(min = 1)
-			public static int excavator_consumption = 4096;
+			public static int excavator_consumption = 2048;
 			@Comment({"The speed of the Excavator. Basically translates to how many degrees per tick it will turn."})
 			@RangeDouble(min = 1e-3)
 			public static double excavator_speed = 1d;
@@ -363,12 +363,12 @@ public class Config
 			public static boolean excavator_particles = true;
 			@Comment({"The chance that a given chunk will contain a mineral vein."})
 			@RangeDouble(min = 1e-3)
-			public static double excavator_chance = .2d;
+			public static double excavator_chance = .5d;
 			@Comment({"The chance that the Excavator will not dig up an ore with the currently downward-facing bucket."})
 			@RangeDouble(min = 0)
 			public static double excavator_fail_chance = .05d;
 			@Comment({"The maximum amount of yield one can get out of a chunk with the excavator. Set a number smaller than zero to make it infinite"})
-			public static int excavator_depletion = 38400;
+			public static int excavator_depletion = -1;
 			@Comment({"List of dimensions that can't contain minerals. Default: The End."})
 			public static int[] excavator_dimBlacklist = new int[]{1};
 
@@ -430,10 +430,10 @@ public class Config
 			public static boolean disableHammerCrushing = false;
 			@Comment({"The maximum durability of the Engineer's Hammer. Used up when hammering ingots into plates."})
 			@RangeInt(min = 1)
-			public static int hammerDurabiliy = 100;
+			public static int hammerDurabiliy = 1000;
 			@Comment({"The maximum durability of the Wirecutter. Used up when cutting plates into wire."})
 			@RangeInt(min = 1)
-			public static int cutterDurabiliy = 250;
+			public static int cutterDurabiliy = 1000;
 			//@Comment({"Enable this to use the old, harder bullet recipes(require one ingot per bullet)"});
 			//public static boolean hardmodeBulletRecipes = false;
 			@Comment({"The amount of base damage a Casull Cartridge inflicts"})
@@ -474,10 +474,10 @@ public class Config
 			public static boolean chemthrower_scroll = true;
 			@Comment({"The base amount of Flux consumed per shot by the Railgun"})
 			@RangeInt(min = 1)
-			public static int railgun_consumption = 800;
+			public static int railgun_consumption = 512;
 			@Comment({"A modifier for the damage of all projectiles fired by the Railgun"})
 			@RangeDouble(min = 1e-3)
-			public static float railgun_damage = 1f;
+			public static float railgun_damage = 2.2f;
 			@Comment({"A whitelist of armor pieces to allow attaching the capacitor backpack, formatting: [mod id]:[item name]"})
 			public static String[] powerpack_whitelist = new String[]{};
 			@Comment({"A blacklist of armor pieces to allow attaching the capacitor backpack, formatting: [mod id]:[item name]. Whitelist has priority over this"})
