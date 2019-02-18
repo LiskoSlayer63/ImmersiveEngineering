@@ -37,7 +37,7 @@ public class AlbedoHelper extends IECompatModule
 	{
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-
+	
 //	@SubscribeEvent
 //	@SideOnly(Side.CLIENT)
 //	public void gatherLights(GatherLightsEvent event)
