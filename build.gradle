@@ -89,9 +89,9 @@ repositories {
         name 'CoFH Maven'
         url "http://maven.covers1624.net/"
     }
-    maven { // Albedo Lights
-        url 'https://repo.elytradev.com/'
-    }
+//    maven { // Albedo Lights
+//        url 'https://repo.elytradev.com/'
+//    }
 }
 
 dependencies {
