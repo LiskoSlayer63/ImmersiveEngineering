@@ -153,7 +153,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
-@SuppressWarnings("deprecation")
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy
 {
@@ -163,8 +162,8 @@ public class ClientProxy extends CommonProxy
 	public static IENixieFontRender nixieFont;
 	public static IEItemFontRender itemFont;
 	public static boolean stencilBufferEnabled = false;
-	public static KeyBinding keybind_magnetEquip = new KeyBinding("key.immersiveengineering.magnetEquip", Keyboard.KEY_S, "key.categories.gameplay");
-	public static KeyBinding keybind_chemthrowerSwitch = new KeyBinding("key.immersiveengineering.chemthrowerSwitch", 0, "key.categories.gameplay");
+	public static KeyBinding keybind_magnetEquip = new KeyBinding("key.immersiveengineering.magnetEquip", Keyboard.KEY_NONE, "key.categories.gameplay");
+	public static KeyBinding keybind_chemthrowerSwitch = new KeyBinding("key.immersiveengineering.chemthrowerSwitch", Keyboard.KEY_NONE, "key.categories.gameplay");
 
 	@Override
 	public void preInit()
@@ -868,7 +867,7 @@ public class ClientProxy extends CommonProxy
 				new ManualPages.Crafting(ManualHelper.getManual(), "conveyor4", ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":vertical")),
 				new ManualPages.Crafting(ManualHelper.getManual(), "conveyor5", ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":splitter")),
 				new ManualPages.Crafting(ManualHelper.getManual(), "conveyor6", ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":covered")),
-				new ManualPages.CraftingMulti(ManualHelper.getManual(), "conveyor7", ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":droppercovered"), ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":extractcovered"), ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":verticalcovered")));
+				new ManualPages.CraftingMulti(ManualHelper.getManual(), "conveyor7", ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":extractcovered"), ConveyorHandler.getConveyorStack(ImmersiveEngineering.MODID+":verticalcovered")));
 		ManualHelper.addEntry("furnaceHeater", ManualHelper.CAT_MACHINES,
 				new ManualPages.Crafting(ManualHelper.getManual(), "furnaceHeater0", new ItemStack(IEContent.blockMetalDevice1, 1, BlockTypes_MetalDevice1.FURNACE_HEATER.getMeta())),
 				new ManualPages.Text(ManualHelper.getManual(), "furnaceHeater1"),
@@ -886,7 +885,7 @@ public class ClientProxy extends CommonProxy
 		pages.add(new ManualPages.Text(ManualHelper.getManual(), "fluidPipes1"));
 		pages.add(new ManualPages.Crafting(ManualHelper.getManual(), "fluidPipes2", new ItemStack(IEContent.blockMetalDevice0, 1, BlockTypes_MetalDevice0.FLUID_PUMP.getMeta())));
 		pages.add(new ManualPages.Text(ManualHelper.getManual(), "fluidPipes3"));
-		if(IEConfig.Machines.pump_infiniteWater||IEConfig.Machines.pump_placeCobble)
+		if(IEConfig.Machines.pump_infiniteFluids.length > 0 || IEConfig.Machines.pump_placeCobble)
 			pages.add(new ManualPages.Text(ManualHelper.getManual(), "fluidPipes4"));
 		pages.add(new ManualPages.Crafting(ManualHelper.getManual(), "fluidPipes5", new ItemStack(IEContent.blockMetalDevice0, 1, BlockTypes_MetalDevice0.FLUID_PLACER.getMeta())));
 		ManualHelper.addEntry("fluidPipes", ManualHelper.CAT_MACHINES, pages.toArray(new IManualPage[pages.size()]));

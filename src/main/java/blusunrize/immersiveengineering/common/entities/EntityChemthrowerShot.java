@@ -12,8 +12,8 @@ import blusunrize.immersiveengineering.api.tool.ChemthrowerHandler;
 import blusunrize.immersiveengineering.api.tool.ChemthrowerHandler.ChemthrowerEffect;
 import blusunrize.immersiveengineering.common.util.IEFluid;
 import com.google.common.base.Optional;
-import elucent.albedo.lighting.ILightProvider;
-import elucent.albedo.lighting.Light;
+//import elucent.albedo.lighting.ILightProvider;
+//import elucent.albedo.lighting.Light;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -33,11 +33,11 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
+//import javax.annotation.Nullable;
 
 
 @net.minecraftforge.fml.common.Optional.Interface(iface = "elucent.albedo.lighting.ILightProvider", modid = "albedo")
-public class EntityChemthrowerShot extends EntityIEProjectile implements ILightProvider
+public class EntityChemthrowerShot extends EntityIEProjectile // implements ILightProvider
 {
 	private FluidStack fluid;
 	private static final DataParameter<Optional<FluidStack>> dataMarker_fluid = EntityDataManager.createKey(EntityChemthrowerShot.class, IEFluid.OPTIONAL_FLUID_STACK);
@@ -163,19 +163,19 @@ public class EntityChemthrowerShot extends EntityIEProjectile implements ILightP
 		}
 	}
 
-	@Nullable
-	@Override
-	public Light provideLight()
-	{
-		FluidStack fluidStack = getFluid();
-		if(fluidStack!=null)
-		{
-			int light = this.isBurning()?15: fluidStack.getFluid().getLuminosity(fluidStack);
-			if(light > 0)
-				return Light.builder().pos(this).radius(.05f*light).color(1, 1, 1).build();
-		}
-		return null;
-	}
+//	@Nullable
+//	@Override
+//	public Light provideLight()
+//	{
+//		FluidStack fluidStack = getFluid();
+//		if(fluidStack!=null)
+//		{
+//			int light = this.isBurning()?15: fluidStack.getFluid().getLuminosity(fluidStack);
+//			if(light > 0)
+//				return Light.builder().pos(this).radius(.05f*light).color(1, 1, 1).build();
+//		}
+//		return null;
+//	}
 
 
 	@Override

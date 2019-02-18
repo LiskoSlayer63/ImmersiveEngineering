@@ -108,7 +108,7 @@ dependencies {
 //    compileOnly "actually-additions:ActuallyAdditions:1.12.2:r137" -Leaving this for when r137 releases
     compileOnly "actually-additions:ActuallyAdditions-1.12.2:r136:hotfix8"
     compileOnly 'baubles:Baubles:1.12:1.5.2'
-    deobfCompile 'elucent:albedo:2.0-SNAPSHOT'
+//    deobfCompile 'elucent:albedo:2.0-SNAPSHOT' -Repository is down
 }
 
 reobf {

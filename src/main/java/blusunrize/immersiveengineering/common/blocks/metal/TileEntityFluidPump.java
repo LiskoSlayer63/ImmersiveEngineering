@@ -25,6 +25,7 @@ import blusunrize.immersiveengineering.common.util.ChatUtils;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IEForgeEnergyWrapper;
 import blusunrize.immersiveengineering.common.util.EnergyHelper.IIEInternalFluxHandler;
 import blusunrize.immersiveengineering.common.util.Utils;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,7 +39,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -48,6 +48,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, IBlockBounds, IHasDummyBlocks, IConfigurableSides, IFluidPipe, IIEInternalFluxHandler, IBlockOverlayText
@@ -91,20 +92,26 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 							continue;
 						int out = this.outputFluid(drain, false);
 						handler.drain(out, true);
-					}
-					else if(world.getTotalWorldTime()%20==((getPos().getX()^getPos().getZ())&19)&&world.getBlockState(getPos().offset(f)).getBlock()==Blocks.WATER&&IEConfig.Machines.pump_infiniteWater&&tank.fill(new FluidStack(FluidRegistry.WATER, 1000), false)==1000&&this.energyStorage.extractEnergy(IEConfig.Machines.pump_consumption, true) >= IEConfig.Machines.pump_consumption)
+					} else if (world.getTotalWorldTime() % 20 == ((getPos().getX() ^ getPos().getZ()) & 19) && world.getBlockState(getPos().offset(f)).getMaterial().isLiquid() && Utils.getRelatedFluid(world, getPos().offset(f)) != null && tank.fill(new FluidStack(Utils.getRelatedFluid(world, getPos().offset(f)), 1000), false) == 1000 
+							&& 
+							((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(Utils.getRelatedFluid(world, getPos().offset(f)).getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+							||
+							(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(Utils.getRelatedFluid(world, getPos().offset(f)).getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+							&& 
+							this.energyStorage.extractEnergy(IEConfig.Machines.pump_consumption, true) >= IEConfig.Machines.pump_consumption)
 					{
+						Fluid fluid = Utils.getRelatedFluid(world, getPos().offset(f));
 						int connectedSources = 0;
 						for(EnumFacing f2 : EnumFacing.HORIZONTALS)
 						{
-							IBlockState waterState = world.getBlockState(getPos().offset(f).offset(f2));
-							if(waterState.getBlock()==Blocks.WATER&&Blocks.WATER.getMetaFromState(waterState)==0)
+							IBlockState liquidState = world.getBlockState(getPos().offset(f).offset(f2));
+							if (liquidState.getMaterial().isLiquid() && Block.isEqualTo(fluid.getBlock(), liquidState.getBlock()))
 								connectedSources++;
 						}
 						if(connectedSources > 1)
 						{
 							this.energyStorage.extractEnergy(IEConfig.Machines.pump_consumption, false);
-							this.tank.fill(new FluidStack(FluidRegistry.WATER, 1000), true);
+							this.tank.fill(new FluidStack(fluid, 1000), true);
 						}
 					}
 				}
@@ -129,7 +136,7 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 						//						if(rainbow>9)
 						//							rainbow++;
 						//						world.setBlock( cc.posX,cc.posY,cc.posZ, Blocks.stained_glass,rainbow, 0x3);
-						if(IEConfig.Machines.pump_placeCobble&&placeCobble)
+						if(IEConfig.Machines.pump_placeCobble && placeCobble)
 							world.setBlockState(pos, Blocks.COBBLESTONE.getDefaultState());
 						this.tank.fill(fs, true);
 						closedList.remove(target);
@@ -167,7 +174,14 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 			if(!checked.contains(next))
 			{
 				Fluid fluid = Utils.getRelatedFluid(world, next);
-				if(fluid!=null&&(fluid!=FluidRegistry.WATER||!IEConfig.Machines.pump_infiniteWater)&&(searchFluid==null||fluid==searchFluid))
+				
+				if(fluid!=null 
+						&& 
+						!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+						||
+						(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+						&& 
+						(searchFluid==null || fluid==searchFluid))
 				{
 					if(searchFluid==null)
 						searchFluid = fluid;
@@ -178,7 +192,13 @@ public class TileEntityFluidPump extends TileEntityIEBase implements ITickable, 
 					{
 						BlockPos pos2 = next.offset(f);
 						fluid = Utils.getRelatedFluid(world, pos2);
-						if(!checked.contains(pos2)&&!closedList.contains(pos2)&&!openList.contains(pos2)&&fluid!=null&&(fluid!=FluidRegistry.WATER||!IEConfig.Machines.pump_infiniteWater)&&(searchFluid==null||fluid==searchFluid))
+						if(!checked.contains(pos2) && !closedList.contains(pos2) && !openList.contains(pos2) && fluid!=null 
+								&& 
+								!((Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && !IEConfig.Machines.pump_blacklistMode)
+								||
+								(!Arrays.asList(IEConfig.Machines.pump_infiniteFluids).contains(fluid.getBlock().getRegistryName().toString()) && IEConfig.Machines.pump_blacklistMode))
+								&& 
+								(searchFluid==null || fluid==searchFluid))
 							openList.add(pos2);
 					}
 				}
