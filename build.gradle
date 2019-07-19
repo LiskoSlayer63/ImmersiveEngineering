@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 def mainVersion = "0.12"
-def buildNumber = "89"
+def buildNumber = "90"
 
 // For those who want the bleeding edge
 buildscript {
@@ -18,12 +18,6 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-}
-*/
 version = "${mainVersion}-${buildNumber}" + getBuildNumber()
 group = "blusunrize"
 def archiveGroup = group
@@ -33,7 +27,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2838"
     runDir = "run"
 
     replace '${version}', project.version
@@ -49,7 +43,7 @@ minecraft {
 repositories {
     maven { // JEI & Tinkers
         name 'DVS1 Maven FS'
-        url 'http://dvs1.progwml6.com/files/maven'
+        url 'https://dvs1.progwml6.com/files/maven'
     }
     maven { // HWYLA
         name "TehNuts WAILA fork"
@@ -89,26 +83,25 @@ repositories {
         name 'CoFH Maven'
         url "http://maven.covers1624.net/"
     }
-//    maven { // Albedo Lights
-//        url 'https://repo.elytradev.com/'
-//    }
+    maven { // Albedo Lights
+        url 'https://repo.elytradev.com/'
+    }
 }
 
 dependencies {
     compileOnly "team.chisel.ctm:CTM:MC1.12.2-0.3.2.18"
-    compileOnly "mezz.jei:jei_1.12.2:4.10.+"
+    compileOnly "mezz.jei:jei_1.12.2:4.15.+"
     compileOnly "cofh:RedstoneFlux:1.12-2.+:deobf"
     compileOnly "slimeknights.mantle:Mantle:1.12-1.3.+"
-    compileOnly "slimeknights:TConstruct:1.12.2-2.10.+"
+    compileOnly "slimeknights:TConstruct:1.12.2-2.12.+"
     compileOnly "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.+"//1.1x-1.4.4-55
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
     compileOnly "opencomputers:OpenComputers:MC1.12.2:1.7.2.67"//li.cil.oc:OpenComputers:MC1.12.1-1.7.0.+"
     compileOnly "mcp.mobius.waila:Hwyla:1.8.20-B35_1.12"
     compileOnly 'industrial-craft:industrialcraft-2:release:ex112'//'net.industrial-craft:industrialcraft-2:2.8.+'
-//    compileOnly "actually-additions:ActuallyAdditions:1.12.2:r137" -Leaving this for when r137 releases
-    compileOnly "actually-additions:ActuallyAdditions-1.12.2:r136:hotfix8"
+    compileOnly "de.ellpeck.actuallyadditions:ActuallyAdditions:1.12.2+"
     compileOnly 'baubles:Baubles:1.12:1.5.2'
-//    deobfCompile 'elucent:albedo:2.0-SNAPSHOT' -Repository is down
+    deobfCompile "albedo:albedo:0.1.3"
 }
 
 reobf {
@@ -292,7 +285,7 @@ class GenerateUpdateJSON extends DefaultTask {
         mcFromIEVersion.put("0.11", "1.11.2")
         mcFromIEVersion.put("0.12", "1.12.2")
     }
-    static def VERSION_PREFIX = "#####Version "
+    static def VERSION_PREFIX = "##### Version "
     static def CURRENT_MC_VERSION = "1.12.2"
     static def CHANGELOG_FOR_MANUAL = "src/main/resources/assets/immersiveengineering/changelog.json"
     static def BUILT_SUFFIX = " - BUILT"
