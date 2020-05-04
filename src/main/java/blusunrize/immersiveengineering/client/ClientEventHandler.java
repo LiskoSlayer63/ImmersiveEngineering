@@ -45,6 +45,7 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import blusunrize.immersiveengineering.common.util.network.MessageChemthrowerSwitch;
 import blusunrize.immersiveengineering.common.util.network.MessageMagnetEquip;
 import blusunrize.immersiveengineering.common.util.network.MessageRequestBlockUpdate;
+import blusunrize.immersiveengineering.common.util.network.MessageRevolverRotate;
 import blusunrize.immersiveengineering.common.util.sound.IEMuffledSound;
 import blusunrize.immersiveengineering.common.util.sound.IEMuffledTickableSound;
 import com.google.common.collect.ImmutableList;
@@ -961,6 +962,11 @@ public class ClientEventHandler implements IResourceManagerReloadListener
 					ImmersiveEngineering.packetHandler.sendToServer(new MessageChemthrowerSwitch(event.getDwheel() < 0));
 					event.setCanceled(true);
 				}
+				if(equipped.getItem() instanceof ItemRevolver)
+				{
+					ImmersiveEngineering.packetHandler.sendToServer(new MessageRevolverRotate(event.getDwheel() < 0));
+					event.setCanceled(true);
+				}
 			}
 		}
 	}
@@ -1246,20 +1252,23 @@ public class ClientEventHandler implements IResourceManagerReloadListener
 		if(coreSample.isEmpty())
 			coreSample = new ItemStack(IEContent.itemCoresample);
 		for(EnumHand hand : EnumHand.values())
-			if(OreDictionary.itemMatches(sampleDrill, player.getHeldItem(hand), true))
+		{
+			ItemStack heldItem = player.getHeldItem(hand);
+			if(OreDictionary.itemMatches(sampleDrill, heldItem, true))
 			{
 				chunkBorders = new int[]{(int)player.posX >> 4<<4, (int)player.posZ >> 4<<4};
 				break;
 			}
-			else if(OreDictionary.itemMatches(coreSample, player.getHeldItem(hand), true))
+			else if(OreDictionary.itemMatches(coreSample, heldItem, true)&&ItemNBTHelper.hasKey(heldItem, "coords"))
 			{
-				int[] coords = ItemNBTHelper.getIntArray(player.getHeldItem(hand), "coords");
+				int[] coords = ItemNBTHelper.getIntArray(heldItem, "coords");
 				if(coords[0]==player.getEntityWorld().provider.getDimension())
 				{
 					chunkBorders = new int[]{coords[1]<<4, coords[2]<<4};
 					break;
 				}
 			}
+		}
 		if(chunkBorders==null&&ClientUtils.mc().objectMouseOver!=null&&ClientUtils.mc().objectMouseOver.typeOfHit==Type.BLOCK&&ClientUtils.mc().world.getTileEntity(ClientUtils.mc().objectMouseOver.getBlockPos()) instanceof TileEntitySampleDrill)
 			chunkBorders = new int[]{(int)player.posX >> 4<<4, (int)player.posZ >> 4<<4};
 

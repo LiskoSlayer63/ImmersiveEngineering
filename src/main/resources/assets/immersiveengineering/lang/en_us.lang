@@ -203,6 +203,10 @@ tile.immersiveengineering.conveyor.immersiveengineering:covered.name=Covered Con
 tile.immersiveengineering.conveyor.immersiveengineering:verticalcovered.name=Vertical Covered Conveyor Belt
 tile.immersiveengineering.conveyor.immersiveengineering:extract.name=Extracting Conveyor Belt
 tile.immersiveengineering.conveyor.immersiveengineering:extractcovered.name=Covered Extracting Conveyor Belt
+tile.immersiveengineering.conveyor.immersiveengineering:chute_iron.name=Sheetmetal Chute
+tile.immersiveengineering.conveyor.immersiveengineering:chute_steel.name=Sheetmetal Chute
+tile.immersiveengineering.conveyor.immersiveengineering:chute_aluminum.name=Sheetmetal Chute
+tile.immersiveengineering.conveyor.immersiveengineering:chute_copper.name=Sheetmetal Chute
 
 tile.immersiveengineering.metal_multiblock.metal_press.name=Metal Press
 tile.immersiveengineering.metal_multiblock.crusher.name=Crusher
@@ -433,6 +437,10 @@ item.immersiveengineering.fluorescent_tube.name=Fluorescent Tube
 item.immersiveengineering.powerpack.name=Capacitor Backpack
 item.immersiveengineering.shield.name=Heavy Plated Shield
 item.immersiveengineering.maintenance_kit.name=Maintenance Kit
+item.immersiveengineering.steel_armor_head.name=Steel Helmet
+item.immersiveengineering.steel_armor_chest.name=Steel Chestplate
+item.immersiveengineering.steel_armor_legs.name=Steel Leggings
+item.immersiveengineering.steel_armor_feet.name=Steel Boots
 
 item.immersiveengineering.map_orevein.name=Mineral Deposit Map
 
@@ -597,6 +605,7 @@ entity.Villager.immersiveengineering.engineer=Structural Engineer
 entity.Villager.immersiveengineering.machinist=Machinist
 entity.Villager.immersiveengineering.electrician=Electrician
 entity.Villager.immersiveengineering.outfitter=Outfitter
+entity.Villager.immersiveengineering.gunsmith=Gunsmith
 
 key.immersiveengineering.magnetEquip=Magnetic Shield Glove (doubletap)
 key.immersiveengineering.chemthrowerSwitch=Switch Chemthrower Tanks
@@ -605,7 +614,8 @@ desc.immersiveengineering.info.attachedTo=Linking from %1$s, %2$s, %3$s
 desc.immersiveengineering.info.attachedToDim=Linking from %1$s, %2$s, %3$s in Dimension %4$s
 desc.immersiveengineering.info.energyStored=Energy stored: %1$s Flux
 desc.immersiveengineering.info.energyStoredEU=Energy stored: %1$s EU
-desc.immersiveengineering.info.blastFuelTime=Blast Fuel: %1$s Ticks
+desc.immersiveengineering.info.blastFuelTime=Burn time:
+desc.immersiveengineering.info.seconds=%1$s Seconds
 desc.immersiveengineering.info.gasStored=Gas stored: %1$s
 desc.immersiveengineering.info.colour=Colour: %1$s
 desc.immersiveengineering.info.day=%1$sd
@@ -702,6 +712,28 @@ desc.immersiveengineering.info.blueprint.specialBullet=Specialized Projectiles
 desc.immersiveengineering.info.blueprint.electrode=Arc Furnace Electrodes
 
 desc.immersiveengineering.info.electrodeIntegrity=Integrity
+
+desc.immersiveengineering.info.revolver.perk.cooldown=Firerate: %1$s%%
+desc.immersiveengineering.info.revolver.perk.cooldown.tier-3=Slow %1$s
+desc.immersiveengineering.info.revolver.perk.cooldown.tier-2=Stuttering %1$s
+desc.immersiveengineering.info.revolver.perk.cooldown.tier-1=Squeaky %1$s
+desc.immersiveengineering.info.revolver.perk.cooldown.tier1=Fanned %1$s
+desc.immersiveengineering.info.revolver.perk.cooldown.tier2=Selfrepeating %1$s
+desc.immersiveengineering.info.revolver.perk.cooldown.tier3=Autococking %1$s
+desc.immersiveengineering.info.revolver.perk.noise=Noise: %1$s%%
+desc.immersiveengineering.info.revolver.perk.noise.tier-3=Bellowing %1$s
+desc.immersiveengineering.info.revolver.perk.noise.tier-2=Loud %1$s
+desc.immersiveengineering.info.revolver.perk.noise.tier-1=Noisy %1$s
+desc.immersiveengineering.info.revolver.perk.noise.tier1=Whisper %1$s
+desc.immersiveengineering.info.revolver.perk.noise.tier2=Silenced %1$s
+desc.immersiveengineering.info.revolver.perk.noise.tier3=Muted %1$s
+desc.immersiveengineering.info.revolver.perk.luck=Luck: %1$s%%
+desc.immersiveengineering.info.revolver.perk.luck.tier-3=Tough %1$s
+desc.immersiveengineering.info.revolver.perk.luck.tier-2=Unlucky %1$s
+desc.immersiveengineering.info.revolver.perk.luck.tier-1=Inauspicious %1$s
+desc.immersiveengineering.info.revolver.perk.luck.tier1=Fortunate %1$s
+desc.immersiveengineering.info.revolver.perk.luck.tier2=Lucky %1$s
+desc.immersiveengineering.info.revolver.perk.luck.tier3=Gamblers %1$s
 
 desc.immersiveengineering.info.bullet.flareColour=Flare Colour: %1$s
 
@@ -1369,6 +1401,8 @@ ie.manual.entry.conveyor4=The Vertical Conveyor Belt is a belt meant to be mount
 ie.manual.entry.conveyor5=The Splitting Conveyor Belt alternates between redirecting Items and Entities left and right, plain and simple. This feature can be used to achieve a more equal distribution in your factories.
 ie.manual.entry.conveyor6=The Covered Conveyor Belt works just like a normal conveyor, however it is covered by a piece of scaffolding, which prevents players from picking up items from it.<br>You can rightclick it with other types of scaffold or glass to change the cover's appearance.
 ie.manual.entry.conveyor7=Similarly, the Dropping, Extracting and Vertical Conveyors can also be covered in scaffolding to achieve the same benefits of "pickup-prevention" while still functioning as they normally do.
+ie.manual.entry.conveyor8=Chutes are simple constructions made from sheetmetal that allow entities to drop down straight. They can insert into inventories below them and be inserted into by conveyors or similar devices. Items within them won't be picked up by players and should be immune to most forms of attraction, magnetic or magical.
+ie.manual.entry.conveyor9=Sneak + rightclick with an Engineer's Hammer to turn the chute into a corner piece that directs an entity to the side.
 
 ie.manual.entry.furnaceHeater.name=External Heater
 ie.manual.entry.furnaceHeater.subtext=Now you're cooking with flux!
@@ -1424,10 +1458,11 @@ ie.manual.entry.maintenanceKit1=A set of tools, wrapped in sturdy hemp cloth, th
 ie.manual.entry.revolver.name=Revolver
 ie.manual.entry.revolver.subtext=Wanted: Dead or Alive
 ie.manual.entry.revolver0=The Revolver, a more elegant weapon from a more civilized age, is an achievement of small mechanics. Small being relative here, since this weapon is chambered for 12-gauge.<br>Similar to the Mining Drill, the Revolver will allow for modification in the <link;workbench;§o§nEngineer's §o§nWorkbench§r>, as detailed on the last pages.
-ie.manual.entry.revolver1=There are different <link;bullets;§o§ntypes §o§nof §o§nammunition§r;> the Revolver will accept. To load it, sneak+rightclick the weapon, then place cartridges into the slots.<br>A loaded Speedloader in your inventory will be used to refill the revolver after you've fired your last shot.
+ie.manual.entry.revolver1=There are different <link;bullets;§o§ntypes §o§nof §o§nammunition§r;> the Revolver will accept. To load it, sneak+rightclick the weapon, then place cartridges into the slots.<br>A loaded Speedloader in your inventory will be used to refill the revolver after you've fired your last shot.<br><br>Note that firing the revolver is quite noisy, and will attract the attention of hostile mobs in the area!
 ie.manual.entry.revolver2=By attaching a §6bayonet§r to the revolver, you outfit it with close-quarter-combat capabilities, allowing for melee damage as powerful as an Iron Sword.
 ie.manual.entry.revolver3=The §6Extended Magazine§r allows loading 6 more cartridges into the revolver. This magazine does not get refilled by a speedloader.
 ie.manual.entry.revolver4=The §6Amplifying Electron Tubes§r apply an electric shock to fired projectiles. This shock persists till it hits the target (don't ask how it works) and is passed on. The target will be stunned for a fraction of a second and all powered equipment they may be using will suffer a slight discharge.
+ie.manual.entry.revolver5=Rarely, when exploring villages and trading with the local engineers, you may find special crafting components for the revolver. These components come with certain intrinsic perks and when used to craft a revolver, they will imbue those perks into it, affecting the §ofirerate§r, the amount of §onoise§r it makes and augmenting the wielder's §oluck§r.
 
 ie.manual.entry.bullets.name=Revolver Cartridges
 ie.manual.entry.bullets.subtext=

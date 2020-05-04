@@ -94,7 +94,9 @@ public class ConveyorVertical extends ConveyorBasic
 			IConveyorBelt sub = ((IConveyorTile)te).getConveyorSubtype();
 			if(sub!=null)
 				for(EnumFacing f2 : sub.sigTransportDirections(te, ((IConveyorTile)te).getFacing()))
-					if(f==f2.getOpposite())
+					if(f2==EnumFacing.UP)
+						break;
+					else if(f==f2.getOpposite())
 						return true;
 		}
 		te = tile.getWorld().getTileEntity(tile.getPos().add(0, -1, 0).offset(f));
@@ -219,10 +221,7 @@ public class ConveyorVertical extends ConveyorBasic
 			{
 				EntityItem item = (EntityItem)entity;
 				if(!contact)
-				{
-					if(item.getAge() > item.lifespan-60*20)
-						item.setAgeToCreativeDespawnTime();
-				}
+					item.setNoDespawn(); //misnamed, actually sets despawn timer to 10 minutes
 				else
 				{
 					TileEntity inventoryTile;

@@ -1,9 +1,34 @@
-##### Version 0.12-90
+##### Version 0.12-92 - BUILT
+- Requires Forge version 14.23.5.2820 or higher (BluSunrize)
+- Added Steel Armor, crafted from steel plates! (BluSunrize)
+- Added a second MultiblockFormEvent to the API, to fire *after* the structure has been checked (BluSunrize)
+- Fixed client only translation reference crashing on servers (BluSunrize)
+- Fixed client only references in Chutes (BluSunrize)
+- Fixed Coresamples without coordinates resulting in a client crash (BluSunrize)
+- Fixed transformers on posts not accepting wires properly (BluSunrize)
+
+##### Version 0.12-91 - BUILT
+- Added the Gunsmith villager, who sells ammunition, blueprints and revolver pieces (BluSunrize)
+- Fixed a crash with vertical conveyors on dedicated servers (Malte)
+- Fixed two negative luck perks combining into a positive (BluSunrize)
+
+##### Version 0.12-90 - BUILT
 - Added a config option to disable fancy Blueprint rendering (BluSunrize)
+- Added chutes, they drop entites straight down and sometimes to the side! (BluSunrize)
+- Added creosote buckets (and other containers) as valid fuel for a furnace (BluSunrize)
+- Added an option to not have coordinates display on a CoreSample (BluSunrize)
+- Added a "removeAll" function to IE's crafttweaker integration (BluSunrize)
+- Added a config option for the transferrates of the Fluid Pipe (BluSunrize)
+- Added the ability to Sneak + Scroll to cycle the revolver manually (DaveArndt)
+- Added perks to the Revolver!
+  - You can find components (barrel, drum, hammer) with perks in crates or on villagers
+  - Crafting a revolver with these components gives the perks to the revolver
+  - This augments its fire-rate, the noise it makes and the luck (for opening chests) of the wielder
 - Changed CoreSamples to draw a chunk overlay like the drill (BluSunrize)
 - Changed Wires to return only half an ingot worth of material when recycled (BluSunrize)
 - Changed Dragonsbreath cartridges to not fire an obscene amount of bullets anymore (BluSunrize)
 - Changed pick-block to cycle through all possible wires for a connector (MalkContent)
+- Changed Chemthrower to be able to affect teammates with beneficial effects (BluSunrize)
 - Items on conveyors now despawn after the usual time when stuck against a block (Malte)
 - Fixed wires sometimes attaching to the wrong parts of transformers (Malte)
 - Fixed wires connecting to the transformer when clicking on the lower blocks (Malte)
@@ -15,6 +40,14 @@
 - Fixed pipes disconnecting visually (MalkContent)
 - Fixed pipes consuming scaffolding to cover when in creative mode (MalkContent)
 - Fixed some visual glitches (BluSunrize)
+- Fixed Crafttweaker handler for Blueprints ignoring NBT (BluSunrize)
+- Fixed the "Aquire"-button for shaders not working outside of creative mode (Malte)
+- Probably fixed the floodlight not working below 0 and above 255 with Cubic Chunks (Malte)
+- Fixed coresamples not rendering when Optfine shaders are enabled (Malte)
+- Fixed UraniumSlabs combining into a Copper-looking block (BluSunrize)
+- Fixed a variety of issues with JEI integration (BluSunrize)
+- Fixed a potential memory leak (BluSunrize)
+- Fixed a TCon API error propagating (BluSunrize)
 - Translations Added/Updated: jp_jp (karakufire), de_de(d-haus)
 
 ##### Version 0.12-89 - BUILT

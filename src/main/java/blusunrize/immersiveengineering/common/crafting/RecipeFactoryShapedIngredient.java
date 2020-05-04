@@ -87,12 +87,14 @@ public class RecipeFactoryShapedIngredient implements IRecipeFactory
 			throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: "+keys);
 
 		ItemStack result = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
-		RecipeShapedIngredient recipe = new RecipeShapedIngredient(group.isEmpty()?null: new ResourceLocation(group), result, primer);
+		RecipeShapedIngredient recipe = constructRecipe(group.isEmpty()?null: new ResourceLocation(group), result, primer);
 
 		if(JsonUtils.getBoolean(json, "quarter_turn", false))
 			recipe.allowQuarterTurn();
 		if(JsonUtils.getBoolean(json, "eighth_turn", false))
 			recipe.allowEighthTurn();
+		if(JsonUtils.hasField(json, "copy_nbt_multiply_decimals"))
+			recipe.setNBTCopyMultiplyDecimals(JsonUtils.getBoolean(json, "copy_nbt_multiply_decimals"));
 		if(JsonUtils.hasField(json, "copy_nbt"))
 		{
 			if(JsonUtils.isJsonArray(json, "copy_nbt"))
@@ -109,5 +111,10 @@ public class RecipeFactoryShapedIngredient implements IRecipeFactory
 				recipe.setNBTCopyPredicate(JsonUtils.getString(json, "copy_nbt_predicate"));
 		}
 		return recipe;
+	}
+
+	protected RecipeShapedIngredient constructRecipe(ResourceLocation group, ItemStack result, ShapedPrimer primer)
+	{
+		return new RecipeShapedIngredient(group, result, primer);
 	}
 }

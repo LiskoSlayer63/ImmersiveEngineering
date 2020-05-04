@@ -114,6 +114,8 @@ public class Config
 		@Comment({"Set to false to disable the stencil buffer. This may be necessary on older GPUs."})
 		@RequiresMcRestart
 		public static boolean stencilBufferEnabled = true;
+		@Comment({"Set to false to have Coresamples not show the coordinates of the chunk."})
+		public static boolean coreSampleCoords = true;
 
 
 		@Comment({"A list of all mods that IE has integrated compatability for", "Setting any of these to false disables the respective compat"})
@@ -201,6 +203,7 @@ public class Config
 			@Mapped(mapClass = Config.class, mapName = "manual_int")
 			@RangeInt(min = 1)
 			public static int coredrill_consumption = 40;
+
 			@Comment({"The Flux the Fluid Pump will consume to pick up a fluid block in the world"})
 			@RangeInt(min = 1)
 			public static int pump_consumption = 250;
@@ -216,6 +219,13 @@ public class Config
 			@Comment({"If this is set to true (default) the pump will replace fluids it picks up with cobblestone in order to reduce lag caused by flowing fluids."})
 			@Mapped(mapClass = Config.class, mapName = "manual_bool")
 			public static boolean pump_placeCobble = true;
+			@Comment({"The basic transferrate of a fluid pipe, in mB/t"})
+			@RangeInt(min = 1)
+			public static int pipe_transferrate = 50;
+			@Comment({"The transferrate of a fluid pipe when accelerated by a pump, in mB/t"})
+			@RangeInt(min = 1)
+			public static int pipe_transferrate_pressurized = 1000;
+
 			@Comment({"The Flux per tick the Charging Station can insert into an item"})
 			@RangeInt(min = 1)
 			public static int charger_consumption = 256;

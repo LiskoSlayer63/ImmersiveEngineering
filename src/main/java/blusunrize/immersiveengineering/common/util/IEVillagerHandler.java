@@ -11,6 +11,7 @@ package blusunrize.immersiveengineering.common.util;
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.DimensionChunkCoords;
 import blusunrize.immersiveengineering.api.crafting.BlueprintCraftingRecipe;
+import blusunrize.immersiveengineering.api.tool.BulletHandler;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler.MineralWorldInfo;
 import blusunrize.immersiveengineering.common.Config.IEConfig;
@@ -107,8 +108,7 @@ public class IEVillagerHandler
 		);
 		career_machinist.addTrade(3,
 				new ItemstackForEmerald(new ItemStack(IEContent.itemToolbox, 1, 0), new EntityVillager.PriceInfo(6, 8)),
-				new ItemstackForEmerald(new ItemStack(IEContent.itemMaterial, 1, 10), new EntityVillager.PriceInfo(1, 3)),
-				new ItemstackForEmerald(BlueprintCraftingRecipe.getTypedBlueprint("specialBullet"), new EntityVillager.PriceInfo(5, 9))
+				new ItemstackForEmerald(new ItemStack(IEContent.itemMaterial, 1, 10), new EntityVillager.PriceInfo(1, 3))
 		);
 		career_machinist.addTrade(4,
 				new ItemstackForEmerald(new ItemStack(IEContent.itemDrillhead, 1, 1), new EntityVillager.PriceInfo(28, 40)),
@@ -167,6 +167,38 @@ public class IEVillagerHandler
 		);
 		career_outfitter.addTrade(3,
 				new ItemstackForEmerald(bag_rare, new EntityVillager.PriceInfo(16, 24))
+		);
+
+		/* Gunsmith
+		 * Sells ammunition, blueprints and revolver parts
+		 */
+		VillagerRegistry.VillagerCareer career_gunsmith = new VillagerRegistry.VillagerCareer(PROF_ENGINEER, ImmersiveEngineering.MODID+".gunsmith");
+
+		career_gunsmith.addTrade(1,
+				new EmeraldForItemstack(BulletHandler.emptyCasing, new EntityVillager.PriceInfo(6, 12)),
+				new EmeraldForItemstack(BulletHandler.emptyShell, new EntityVillager.PriceInfo(6, 12)),
+				new ItemstackForEmerald(new ItemStack(IEContent.itemMaterial, 1, 13), new EntityVillager.PriceInfo(2, 4))
+		);
+		career_gunsmith.addTrade(2,
+				new ItemstackForEmerald(BlueprintCraftingRecipe.getTypedBlueprint("bullet"), new EntityVillager.PriceInfo(3, 6)),
+				new ItemstackForEmerald(BulletHandler.getBulletStack("casull"), new EntityVillager.PriceInfo(-4, -2)),
+				new RevolverPieceForEmeralds()
+		);
+		career_gunsmith.addTrade(3,
+				new RevolverPieceForEmeralds(),
+				new ItemstackForEmerald(BulletHandler.getBulletStack("buckshot"), new EntityVillager.PriceInfo(-6, -2)),
+				new ItemstackForEmerald(BulletHandler.getBulletStack("flare"), new EntityVillager.PriceInfo(-2, -1)),
+				new ItemstackForEmerald(BlueprintCraftingRecipe.getTypedBlueprint("specialBullet"), new EntityVillager.PriceInfo(5, 9))
+		);
+		career_gunsmith.addTrade(4,
+				new RevolverPieceForEmeralds(),
+				new ItemstackForEmerald(BulletHandler.getBulletStack("silver"), new EntityVillager.PriceInfo(-4, -1)),
+				new ItemstackForEmerald(BulletHandler.getBulletStack("he"), new EntityVillager.PriceInfo(2, 4))
+		);
+		career_gunsmith.addTrade(5,
+				new RevolverPieceForEmeralds(),
+				new RevolverPieceForEmeralds(),
+				new RevolverPieceForEmeralds()
 		);
 	}
 
@@ -263,7 +295,7 @@ public class IEVillagerHandler
 					return;
 				}
 				BlockPos blockPos = new BlockPos(chunkCoords.getXStart()+8, 64, chunkCoords.getZStart()+8);
-				ItemStack itemstack = ItemMap.setupNewMap(world, (double)blockPos.getX(), (double)blockPos.getZ(), (byte)1, true, true);
+				ItemStack itemstack = ItemMap.setupNewMap(world, blockPos.getX(), blockPos.getZ(), (byte)1, true, true);
 				ItemMap.renderBiomePreviewMap(world, itemstack);
 				MapData.addTargetDecoration(itemstack, blockPos, "ie:coresample_treasure", Type.TARGET_POINT);
 				itemstack.setTranslatableName("item.immersiveengineering.map_orevein.name");
@@ -271,6 +303,21 @@ public class IEVillagerHandler
 
 				recipeList.add(new MerchantRecipe(new ItemStack(Items.EMERALD, 8+random.nextInt(8)), new ItemStack(IEContent.itemMetal), itemstack));
 			}
+		}
+	}
+
+	private static class RevolverPieceForEmeralds implements EntityVillager.ITradeList
+	{
+		public RevolverPieceForEmeralds()
+		{
+		}
+
+		@Override
+		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+		{
+			ItemStack stack = new ItemStack(IEContent.itemMaterial, 1, 14+random.nextInt(3));
+			ItemNBTHelper.setBoolean(stack, "generatePerks", true);
+			recipeList.add(new MerchantRecipe(new ItemStack(Items.EMERALD, 1), ItemStack.EMPTY, stack, 0, 1));
 		}
 	}
 }

@@ -10,6 +10,7 @@ package blusunrize.immersiveengineering.common.entities;
 
 import blusunrize.immersiveengineering.api.tool.ChemthrowerHandler;
 import blusunrize.immersiveengineering.api.tool.ChemthrowerHandler.ChemthrowerEffect;
+import blusunrize.immersiveengineering.api.tool.ChemthrowerHandler.ChemthrowerEffect_Potion;
 import blusunrize.immersiveengineering.common.util.IEFluid;
 import com.google.common.base.Optional;
 //import elucent.albedo.lighting.ILightProvider;
@@ -163,20 +164,31 @@ public class EntityChemthrowerShot extends EntityIEProjectile // implements ILig
 		}
 	}
 
-//	@Nullable
-//	@Override
-//	public Light provideLight()
-//	{
-//		FluidStack fluidStack = getFluid();
-//		if(fluidStack!=null)
-//		{
-//			int light = this.isBurning()?15: fluidStack.getFluid().getLuminosity(fluidStack);
-//			if(light > 0)
-//				return Light.builder().pos(this).radius(.05f*light).color(1, 1, 1).build();
-//		}
-//		return null;
-//	}
+	@Override
+	protected boolean allowFriendlyFire(EntityPlayer target)
+	{
+		FluidStack fluidStack = getFluid();
+		if(fluidStack!=null)
+		{
+			ChemthrowerEffect effect = ChemthrowerHandler.getEffect(fluidStack.getFluid());
+			return effect instanceof ChemthrowerEffect_Potion&&!((ChemthrowerEffect_Potion)effect).getIsNegative();
+		}
+		return false;
+	}
 
+	@Nullable
+	@Override
+	public Light provideLight()
+	{
+		FluidStack fluidStack = getFluid();
+		if(fluidStack!=null)
+		{
+			int light = this.isBurning()?15: fluidStack.getFluid().getLuminosity(fluidStack);
+			if(light > 0)
+				return Light.builder().pos(this).radius(.05f*light).color(1, 1, 1).build();
+		}
+		return null;
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
