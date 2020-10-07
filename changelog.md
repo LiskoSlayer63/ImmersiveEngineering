@@ -1,3 +1,15 @@
+##### Version 0.12-98 - BUILT
+- Added combat for XLFood to the cloche (LeoBeliik)
+- Added Albedo combat for the flueorescent tube (Pabilo8)
+- Added steel hoe (BluSunrize)
+- Fixed chutes crashing on dedicated servers (Malte)
+- Fixed the Skyhook crashing due to Optifine (Malte)
+- Fixed division by zero error in multiblock processes (Thonikum)
+- Fixed fluid evaporation in the nether when using the Jerrycan (BluSunrize)
+- Fixed windmills being stopped by snow (BluSunrize)
+- Fixed interaction between Sheetmetal Tanks and RFTools screens (BluSunrize)
+- Translations Added/Updated: ko_kr (yor42), jp_jp (karakufire), zh_cn (mcBegins2Snow), ru_ru (Shellyoung)
+
 ##### Version 0.12-92 - BUILT
 - Requires Forge version 14.23.5.2820 or higher (BluSunrize)
 - Added Steel Armor, crafted from steel plates! (BluSunrize)
