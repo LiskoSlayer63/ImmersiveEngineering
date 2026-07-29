@@ -124,6 +124,13 @@ public class IEBlockTags extends BlockTagsProvider
 				.add(Blocks.COPPER_TRAPDOOR, Blocks.EXPOSED_COPPER_TRAPDOOR, Blocks.WEATHERED_COPPER_TRAPDOOR, Blocks.OXIDIZED_COPPER_TRAPDOOR)
 				.add(Blocks.WAXED_COPPER_TRAPDOOR, Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR, Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR, Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR);
 
+		tag(Tags.Blocks.VILLAGER_JOB_SITES)
+				.add(Cloth.SHADER_BANNER.get(), Cloth.SHADER_BANNER_WALL.get())
+				.add(WoodenDevices.CIRCUIT_TABLE.get())
+				.add(WoodenDevices.WORKBENCH.get())
+				.add(WoodenDevices.CRAFTING_TABLE.get())
+				.add(WoodenDevices.TURNTABLE.get());
+
 		for(BlockEntry<MetalLadderBlock> b : MetalDecoration.METAL_LADDER.values())
 			tag(BlockTags.CLIMBABLE).add(b.get());
 		for(EnumMetals metal : EnumMetals.values())
@@ -162,6 +169,7 @@ public class IEBlockTags extends BlockTagsProvider
 		{
 			tag(IETags.treatedWood).add(WoodenDecoration.TREATED_WOOD.get(style).get());
 			tag(IETags.treatedWoodSlab).add(IEBlocks.TO_SLAB.get(IEBlocks.WoodenDecoration.TREATED_WOOD.get(style).getId()).get());
+			tag(IETags.treatedWoodStair).add(IEBlocks.TO_STAIRS.get(IEBlocks.WoodenDecoration.TREATED_WOOD.get(style).getId()).get());
 		}
 		for(MetalScaffoldingType t : MetalScaffoldingType.values())
 		{
@@ -384,19 +392,17 @@ public class IEBlockTags extends BlockTagsProvider
 	private void registerGrindingDiskMineable()
 	{
 		IntrinsicTagAppender<Block> tag = tag(IETags.grindingDiskHarvestable);
-		// storage and remove rocklike storage, sheetmetal
-		tag.addTag(Tags.Blocks.STORAGE_BLOCKS);
+		// add sheetmetal blocks & slabs
 		tag.addTag(IETags.sheetmetals);
-		// storage and sheetmetal slabs
+		tag.addTag(IETags.sheetmetalSlabs);
+		// add storage blocks; first IE and then Vanilla. we used to use the `c:storage_blocks` tag but that was getting far too many out of bounds blocks (ex. Supplementaries feather blocks)
 		for(EnumMetals metal : EnumMetals.values())
 			if(!metal.isVanillaMetal())
+			{
+				tag.add(Metals.STORAGE.get(metal).get());
 				tag.add(IEBlocks.TO_SLAB.get(Metals.STORAGE.get(metal).getId()).get());
-		tag.addTag(IETags.sheetmetalSlabs);
-		// remove blocks the grinding disc shouldn't cut
-		tag.remove(Blocks.AMETHYST_BLOCK, Blocks.QUARTZ_BLOCK, Blocks.LAPIS_BLOCK, Blocks.REDSTONE_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.COAL_BLOCK);
-		tag.remove(Tags.Blocks.STORAGE_BLOCKS_RAW_COPPER, Tags.Blocks.STORAGE_BLOCKS_RAW_IRON, Tags.Blocks.STORAGE_BLOCKS_RAW_GOLD);
-		for(BlockEntry raw_storage : Metals.RAW_ORES.values())
-			tag.remove(raw_storage.get());
+			}
+		tag.add(Blocks.IRON_BLOCK, Blocks.COPPER_BLOCK, Blocks.GOLD_BLOCK, Blocks.NETHERITE_BLOCK);
 		// copper
 		tag.addTag(IETags.copperBlocks);
 		tag.addTag(IETags.cutCopperBlocks);

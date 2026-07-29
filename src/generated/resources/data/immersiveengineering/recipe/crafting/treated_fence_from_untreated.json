@@ -1,0 +1,22 @@
+{
+  "type": "immersiveengineering:shaped_fluid",
+  "category": "misc",
+  "key": {
+    "b": {
+      "type": "immersiveengineering:fluid_stack",
+      "amount": 1000,
+      "tag": "c:creosote"
+    },
+    "w": {
+      "tag": "immersiveengineering:untreated_wooden_fences"
+    }
+  },
+  "pattern": [
+    "wbw",
+    "www"
+  ],
+  "result": {
+    "count": 5,
+    "id": "immersiveengineering:treated_fence"
+  }
+}

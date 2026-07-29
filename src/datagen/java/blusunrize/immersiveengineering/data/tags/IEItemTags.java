@@ -20,6 +20,9 @@ import blusunrize.immersiveengineering.common.register.IEBlocks.BlockEntry;
 import blusunrize.immersiveengineering.common.register.IEBlocks.Cloth;
 import blusunrize.immersiveengineering.common.register.IEBlocks.Connectors;
 import blusunrize.immersiveengineering.common.register.IEBlocks.MetalDevices;
+import blusunrize.immersiveengineering.common.register.IEBlocks.WoodenDecoration;
+import blusunrize.immersiveengineering.common.register.IEBlocks.WoodenDevices;
+import blusunrize.immersiveengineering.common.register.IEFluids;
 import blusunrize.immersiveengineering.common.register.IEItems.*;
 import com.google.common.base.Preconditions;
 import net.minecraft.core.HolderLookup.Provider;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
 public class IEItemTags extends ItemTagsProvider
@@ -50,9 +54,27 @@ public class IEItemTags extends ItemTagsProvider
 	}
 
 	@Override
-	protected void addTags(Provider p_256380_)
+	protected void addTags(@Nonnull Provider holderLookupProvider)
 	{
 		IETags.forAllBlocktags(this::copy);
+		// untreated tags
+		tag(IETags.untreatedWoodenPlanks)
+				.addTag(ItemTags.PLANKS)
+				.remove(IETags.getItemTag(IETags.treatedWood));
+		tag(IETags.untreatedWoodenSlabs)
+				.addTag(ItemTags.WOODEN_SLABS)
+				.remove(IETags.getItemTag(IETags.treatedWoodSlab));
+		tag(IETags.untreatedWoodenStairs)
+				.addTag(ItemTags.WOODEN_STAIRS)
+				.remove(IETags.getItemTag(IETags.treatedWoodStair));
+		tag(IETags.untreatedWoodenFences)
+				.addTag(ItemTags.WOODEN_FENCES)
+				.addTag(Tags.Items.FENCES_WOODEN)
+				.remove(WoodenDecoration.TREATED_FENCE.get().asItem());
+		tag(IETags.untreatedWoodenGates)
+				.addTag(Tags.Items.FENCE_GATES_WOODEN)
+				.remove(WoodenDecoration.TREATED_FENCE_GATE.get().asItem());
+		// metals tags
 		for(EnumMetals metal : EnumMetals.values())
 		{
 			MetalTags tags = IETags.getTagsFor(metal);
@@ -87,17 +109,21 @@ public class IEItemTags extends ItemTagsProvider
 		tag(Tags.Items.SEEDS).add(Misc.HEMP_SEEDS.get());
 		tag(IETags.seedsHemp).add(Misc.HEMP_SEEDS.get());
 		tag(Tags.Items.RODS_WOODEN).add(Ingredients.STICK_TREATED.get());
+		tag(IETags.untreatedStick).addTag(Tags.Items.RODS_WOODEN).remove(IETags.treatedStick);
 		tag(ItemTags.COALS).add(Ingredients.COAL_COKE.get());
 		tag(Tags.Items.LEATHERS).add(Ingredients.ERSATZ_LEATHER.get());
 		tag(IETags.treatedStick).add(Ingredients.STICK_TREATED.get());
 		tag(IETags.slag).add(Ingredients.SLAG.get());
+		tag(Tags.Items.FERTILIZERS).add(Misc.FERTILIZER.get());
 		tag(IETags.ironRod).add(Ingredients.STICK_IRON.get());
 		tag(IETags.steelRod).add(Ingredients.STICK_STEEL.get());
 		tag(IETags.aluminumRod).add(Ingredients.STICK_ALUMINUM.get());
 		tag(IETags.netheriteRod).add(Ingredients.STICK_NETHERITE.get());
 		tag(IETags.netheriteNugget).add(Ingredients.NUGGET_NETHERITE.asItem());
 		tag(Tags.Items.NUGGETS).add(Ingredients.NUGGET_NETHERITE.asItem());
+		tag(IETags.fibers).add(Ingredients.HEMP_FIBER.get());
 		tag(IETags.fiberHemp).add(Ingredients.HEMP_FIBER.get());
+		tag(IETags.fabric).add(Ingredients.HEMP_FABRIC.get());
 		tag(IETags.fabricHemp).add(Ingredients.HEMP_FABRIC.get());
 		tag(IETags.coalCoke).add(Ingredients.COAL_COKE.get());
 		tag(IETags.coalCokeDust).add(Ingredients.DUST_COKE.get());
@@ -125,6 +151,7 @@ public class IEItemTags extends ItemTagsProvider
 				.addTag(IETags.steelRod)
 				.addTag(IETags.netheriteRod);
 		tag(IETags.plasticPlate).add(Ingredients.DUROPLAST_PLATE.asItem());
+		tag(IETags.plates).add(Ingredients.DUROPLAST_PLATE.asItem());
 		tag(IETags.sawblades).add(Tools.SAWBLADE.get());
 		tag(IETags.circuitPCB).add(Ingredients.CIRCUIT_BOARD.asItem());
 		tag(IETags.circuitLogic).add(Ingredients.ELECTRON_TUBE.asItem());
@@ -139,13 +166,40 @@ public class IEItemTags extends ItemTagsProvider
 		tag(IETags.observerMaterial).addTag(IETags.paper);
 		tag(ItemTags.CLUSTER_MAX_HARVESTABLES).add(Tools.STEEL_PICK.get());
 
+		tag(Tags.Items.VILLAGER_JOB_SITES)
+				.add(WoodenDevices.CIRCUIT_TABLE.asItem())
+				.add(WoodenDevices.WORKBENCH.asItem())
+				.add(WoodenDevices.CRAFTING_TABLE.asItem())
+				.add(WoodenDevices.TURNTABLE.asItem());
+
+		tag(Tags.Items.BUCKETS)
+				.add(Misc.POTION_BUCKET.get())
+				.add(IEFluids.ACETALDEHYDE.getBucket())
+				.add(IEFluids.CONCRETE.getBucket())
+				.add(IEFluids.BIODIESEL.getBucket())
+				.add(IEFluids.CREOSOTE.getBucket())
+				.add(IEFluids.ETHANOL.getBucket())
+				.add(IEFluids.HERBICIDE.getBucket())
+				.add(IEFluids.HIGH_POWER_BIODIESEL.getBucket())
+				.add(IEFluids.PHENOLIC_RESIN.getBucket())
+				.add(IEFluids.REDSTONE_ACID.getBucket());
+
 		generateTagsForToolbox();
 		tag(ItemTags.SHOVELS).add(Tools.STEEL_SHOVEL.get());
 		tag(ItemTags.PICKAXES).add(Tools.STEEL_PICK.get());
+		tag(Tags.Items.MINING_TOOL_TOOLS).add(Tools.STEEL_PICK.get());
 		tag(ItemTags.HOES).add(Tools.STEEL_HOE.get());
 		tag(ItemTags.AXES).add(Tools.STEEL_AXE.get());
 		tag(ItemTags.SWORDS).add(Tools.STEEL_SWORD.get());
+		tag(Tags.Items.MELEE_WEAPON_TOOLS).add(Tools.STEEL_AXE.get(), Tools.STEEL_SWORD.get());
 		tag(Tags.Items.TOOLS_SHIELD).add(Misc.SHIELD.get());
+
+		tag(Tags.Items.ENCHANTABLES)
+				.add(Tools.HAMMER.get(), Tools.WIRECUTTER.get());
+		tag(ItemTags.DURABILITY_ENCHANTABLE)
+				.add(Tools.HAMMER.get(), Tools.WIRECUTTER.get());
+		tag(ItemTags.VANISHING_ENCHANTABLE)
+				.add(Tools.HAMMER.get(), Tools.WIRECUTTER.get());
 
 		for(var slot : ArmorItem.Type.values())
 			if(slot!=Type.BODY)
@@ -154,6 +208,11 @@ public class IEItemTags extends ItemTagsProvider
 						.add(Tools.STEEL_ARMOR.get(slot).asItem())
 						.add(Misc.FARADAY_SUIT.get(slot).asItem());
 				tag(ItemTags.TRIMMABLE_ARMOR).add(Tools.STEEL_ARMOR.get(slot).asItem());
+				tag(Tags.Items.ENCHANTABLES).remove(Misc.FARADAY_SUIT.get(slot).asItem());
+				tag(ItemTags.ARMOR_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(slot).asItem());
+				tag(ItemTags.DURABILITY_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(slot).asItem());
+				tag(ItemTags.VANISHING_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(slot).asItem());
+				tag(ItemTags.EQUIPPABLE_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(slot).asItem());
 			}
 		tag(ItemTags.HEAD_ARMOR)
 				.add(Tools.STEEL_ARMOR.get(ArmorItem.Type.HELMET).asItem())
@@ -167,6 +226,10 @@ public class IEItemTags extends ItemTagsProvider
 		tag(ItemTags.FOOT_ARMOR)
 				.add(Tools.STEEL_ARMOR.get(ArmorItem.Type.BOOTS).asItem())
 				.add(Misc.FARADAY_SUIT.get(ArmorItem.Type.BOOTS).asItem());
+		tag(ItemTags.HEAD_ARMOR_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(ArmorItem.Type.HELMET).asItem());
+		tag(ItemTags.CHEST_ARMOR_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(ArmorItem.Type.CHESTPLATE).asItem());
+		tag(ItemTags.LEG_ARMOR_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(ArmorItem.Type.LEGGINGS).asItem());
+		tag(ItemTags.FOOT_ARMOR_ENCHANTABLE).remove(Misc.FARADAY_SUIT.get(ArmorItem.Type.BOOTS).asItem());
 
 		tag(IETags.recyclingIgnoredComponents)
 				// Ignore bricks for outputting
