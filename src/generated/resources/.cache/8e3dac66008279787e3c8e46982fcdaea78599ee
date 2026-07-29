@@ -88,6 +88,7 @@ b60ddad4fd1c2aab06f2e15a6e8ce5be8a5669a0 data/c/tags/item/plates/uranium.json
 747d99fdc66fabfab406c81cbdf417438236989e data/c/tags/item/rods/netherite.json
 33dad48f4867df6318ed25cb425b0b0094d2aa8a data/c/tags/item/rods/steel.json
 a8288ef96b46a0f3026247e045d3666b6047e685 data/c/tags/item/rods/treated_wood.json
+a006167f5ef3c21d408ea8b8dc0a7f68022dcda1 data/c/tags/item/rods/untreated_wood.json
 a8288ef96b46a0f3026247e045d3666b6047e685 data/c/tags/item/rods/wooden.json
 de1d550cd16eb974c4908a0707d28c459d7100cc data/c/tags/item/sawblades.json
 e1fcb72ddbe4430266625044432e9752bb0890e6 data/c/tags/item/seeds.json
@@ -159,6 +160,12 @@ ba8541c1dcff08a470290e6d940fd73f07a791ad data/immersiveengineering/tags/item/too
 abd64977cb7f9a82733f5a615230b150179a2123 data/immersiveengineering/tags/item/tools/wirecutters.json
 1ecedf0824d3b4f49aec34b67416c1243d1d23a0 data/immersiveengineering/tags/item/treated_wood.json
 485ca26048e0c430a7ab442ed9e5b1a1ea596bb5 data/immersiveengineering/tags/item/treated_wood_slab.json
+fcdf4c2b6abbfbd23b9e637503dacf20f77a9105 data/immersiveengineering/tags/item/treated_wood_stair.json
+7cdfabddb6e08e05937e3b6f869263435cf0a936 data/immersiveengineering/tags/item/untreated_wooden_fences.json
+ef4d2d910c11d70113f95c8fc2a903a1dda59bc8 data/immersiveengineering/tags/item/untreated_wooden_gates.json
+b8163a112f4873aefc68e7e05d984fc6df211730 data/immersiveengineering/tags/item/untreated_wooden_planks.json
+24dbc26984f1ef0094112d31e9f96481fff9b771 data/immersiveengineering/tags/item/untreated_wooden_slabs.json
+d99fbeeb47b2d4ebb5f8ffdf23d0877fee98f6f0 data/immersiveengineering/tags/item/untreated_wooden_stairs.json
 92f388f513fbebfa39166f12dd2cbfa4f25138f7 data/minecraft/tags/item/axes.json
 ca80813f3c36ca4d7cd3b091a242dffa5652499d data/minecraft/tags/item/bookshelf_books.json
 f981438643de6f70029b9950180e9f2f987f773b data/minecraft/tags/item/chest_armor.json
