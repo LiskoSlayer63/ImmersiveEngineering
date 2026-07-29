@@ -1,4 +1,4 @@
-// 1.21.1	2025-12-20T14:18:45.559920093	Tags for minecraft:block mod id immersiveengineering
+// 1.21.1	2025-08-20T11:16:17.329110157	Tags for minecraft:block mod id immersiveengineering
 bb2e9cd3d85c96526d774c4c6023d900f99a15bc data/c/tags/block/fences/aluminum.json
 c9ee95be2edb84e91278b0fef1cbc9dea336b664 data/c/tags/block/fences/steel.json
 798333dba3595d9304d05418ce04a44f69a7d6c1 data/c/tags/block/gravels.json
@@ -41,7 +41,6 @@ b55e74dc34f8adea30d4dc91d50f91f426aa114b data/c/tags/block/storage_blocks/raw_si
 511af3b19f7d8b92766975510260be68380ca969 data/c/tags/block/storage_blocks/silver.json
 57fdca4c0f5f6529987aa3d07d4a4f48a424e016 data/c/tags/block/storage_blocks/steel.json
 e563b87b316084581f07d20d80466bc0014fce68 data/c/tags/block/storage_blocks/uranium.json
-e72c983dd5676781a209119059b19454369a4f43 data/c/tags/block/villager_job_sites.json
 23e0570e60d941c629a243d8c02fbf74523eee75 data/chiselsandbits/tags/block/chiselable/forced.json
 085238f24aca214ce9eb3f57ab02370467990f33 data/immersiveengineering/tags/block/blocks/copper.json
 fb960fb69ed7f923b8ddb20685e869b6cfeb1a55 data/immersiveengineering/tags/block/buzzsaw/tree_blacklist.json
@@ -51,7 +50,7 @@ a512013e18e15e72a03d9d066e8c87ca591ed9cd data/immersiveengineering/tags/block/co
 240d783ca901747689edbff6ec068e1ebafd3dc6 data/immersiveengineering/tags/block/cut_stairs/copper.json
 950a086f855d118e00d3fc9697663c7721c42db1 data/immersiveengineering/tags/block/incorrect_for_steel_tool.json
 f7dc293929a2176bc6e428c765f6bf49fbeccdb5 data/immersiveengineering/tags/block/mineable/drill.json
-e12175e912016ec8b67da9407701e5ae0d9b8527 data/immersiveengineering/tags/block/mineable/grinding_disk.json
+c9fdb54bb2d97e3f23e4a3eae1b985d0cab9ae89 data/immersiveengineering/tags/block/mineable/grinding_disk.json
 9337c41450256bb89191a2f67ce281f2ddcfaa97 data/immersiveengineering/tags/block/mineable/hammer.json
 07da0c723dffb7f89d89d542cb413e3f5c7c829f data/immersiveengineering/tags/block/mineable/rockcutter.json
 22c291dd8a303b2f6629a7430880a0678e679ac4 data/immersiveengineering/tags/block/mineable/wirecutter.json
